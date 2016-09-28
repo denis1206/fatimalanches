@@ -1,28 +1,114 @@
-<!DOCTYPE html>
-<html>
+﻿<!DOCTYPE html>
+<html lang="pt-br">
     <head>
-    <!--
-        Customize the content security policy in the meta tag below as needed. Add 'unsafe-inline' to default-src to enable inline JavaScript.
-        For details, see http://go.microsoft.com/fwlink/?LinkID=617521
-    -->
         <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">
         
+        <meta charset="UTF-8">
         <meta name="format-detection" content="telephone=no">
         <meta name="msapplication-tap-highlight" content="no">
         <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
         <link rel="stylesheet" type="text/css" href="css/index.css">
-        <title>FatimaLanches</title>
+        <link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.5.min.css">
+        <link rel="stylesheet" type="text/css" href="css/jquery.mobile.theme-1.4.5.min.css">
+        <title>Comanda 2.0</title>
+
+        <style>
+            ::-webkit-scrollbar { 
+                display: none; 
+            }
+        </style>
     </head>
-    <body>
-        <div class="app">
-            <h1>Apache Cordova</h1>
-            <div id="deviceready" class="blink">
-                <p class="event listening">Connecting to Device</p>
-                <p class="event received">Device is Ready</p>
+<body>
+    <div data-role="page" id="paginaPrincipal">
+        <div data-role="header">
+            <h1>Bem-vindo</h1>
+        </div>
+        <div data-role="main" class="ui-content" id="main">
+            <div class="chooseBtn"><a href="#novaComanda" data-transition="slide">Abrir Nova Comanda</a></div>
+            <div class="chooseBtn"><a href="#comandasAbertas" data-transition="slide">Comandas Abertas</a></div>
+        </div>
+        <div data-role="footer" data-position="fixed">
+            <div data-role="navbar">
+                <ul>
+                    <li><a href="#paginaPrincipal" data-role="tab" data-icon="grid" class="ui-btn-active">Comandas</a></li>
+                    <li><a href="#listaProdutos" data-role="tab" data-icon="grid">Produtos</a></li>
+                    <li><a href="#listaMesas" data-role="tab" data-icon="grid">Mesas</a></li>
+                </ul>
             </div>
         </div>
-        <script type="text/javascript" src="cordova.js"></script>
-        <script type="text/javascript" src="scripts/platformOverrides.js"></script>
-        <script type="text/javascript" src="scripts/index.js"></script>
-    </body>
+    </div>
+
+    <div data-role="page" id="comandasAbertas">
+        <div data-role="header">
+            <a href="#" data-icon="back" data-rel="back" title="Voltar">Voltar</a>
+            <h1>Comandas</h1>
+        </div>
+        <div data-role="main" class="ui-content">
+            <ul data-role="listview" data-inset="true" data-filter="true" data-filter-placeholder="Pesquisa" id="listaComandas">
+            </ul>
+        </div>
+    </div>
+
+    <div data-role="page" id="novaComanda">
+        <div data-role="header">
+            <a href="#" data-icon="back" data-rel="back" title="Voltar">Voltar</a>
+            <h1>Nova Comanda</h1>
+        </div>
+        <div data-role="main" class="ui-content">
+            <input type="number" name="number" id="number" value="" min="1" max="12" step="1" class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset" placeholder="Digite o número da mesa">
+            <button id="teste">Cadastrar</button>
+        </div>
+
+        <div data-role="popup" id="purchase" data-theme="a" data-overlay-theme="b" class="ui-content" style="max-width:340px; padding-bottom:2em;">
+            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            <h3>Atenção</h3>
+            <p></p>
+            <a href="index.html" data-rel="back" class="ui-shadow ui-btn ui-corner-all ui-btn-inline ui-mini">OK</a>
+        </div>
+    </div>
+
+    <div data-role="page" id="listaProdutos">
+        <div data-role="header">
+            <a href="#" data-icon="back" data-rel="back" title="Go back">Voltar</a>
+            <h1>Produtos</h1>
+        </div>
+        <div data-role="main" class="ui-content">
+        </div>
+
+        <div data-role="footer" data-position="fixed">
+            <div data-role="navbar">
+                <ul>
+                    <li><a href="#paginaPrincipal" data-role="tab" data-icon="grid">Comandas</a></li>
+                    <li><a href="#listaProdutos" data-role="tab" data-icon="grid" class="ui-btn-active">Produtos</a></li>
+                    <li><a href="#listaMesas" data-role="tab" data-icon="grid">Mesas</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div data-role="page" id="listaMesas">
+        <div data-role="header">
+            <a href="#" data-icon="back" data-rel="back" title="Go back">Back</a>
+            <h1>Mesas</h1>
+        </div>
+        <div data-role="main" class="ui-content">
+        </div>
+
+        <div data-role="footer" data-position="fixed">
+            <div data-role="navbar">
+                <ul>
+                    <li><a href="#paginaPrincipal" data-role="tab" data-icon="grid">Comandas</a></li>
+                    <li><a href="#listaProdutos" data-role="tab" data-icon="grid">Produtos</a></li>
+                    <li><a href="#listaMesas" data-role="tab" data-icon="grid" class="ui-btn-active">Mesas</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript" src="cordova.js"></script>
+    <script type="text/javascript" src="scripts/index.js"></script>
+    <script type="text/javascript" src="scripts/jquery.min.js"></script>
+    <script type="text/javascript" src="scripts/jquery.mobile-1.4.5.js"></script>
+    <script type="text/javascript" src="scripts/platformOverrides.js"></script>
+</body>
 </html>

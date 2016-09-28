@@ -1,10 +1,10 @@
 {
      "android": {
          "release": {
-             "keystore": "",
-             "storePassword": "",
-             "alias": "",
-             "password" : "",
+             "keystore": "c:\\my-release-key.keystore",
+             "storePassword": "123456",
+             "alias": "Denis",
+             "password" : "123456",
              "keystoreType": ""
          }
      }
