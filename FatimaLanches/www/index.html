@@ -1,7 +1,8 @@
 ﻿<!DOCTYPE html>
 <html lang="pt-br">
     <head>
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">
+        <!--<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">-->
+        <access origin="*" />
         
         <meta charset="UTF-8">
         <meta name="format-detection" content="telephone=no">
@@ -10,6 +11,8 @@
         <link rel="stylesheet" type="text/css" href="css/index.css">
         <link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.5.min.css">
         <link rel="stylesheet" type="text/css" href="css/jquery.mobile.theme-1.4.5.min.css">
+        <link rel="stylesheet" type="text/css" href="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.min.css" />
+
         <title>Comanda 2.0</title>
 
         <style>
@@ -69,10 +72,12 @@
 
     <div data-role="page" id="listaProdutos">
         <div data-role="header">
-            <a href="#" data-icon="back" data-rel="back" title="Go back">Voltar</a>
+            <a href="#" data-icon="back" data-rel="back" title="Go back" class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-back">Voltar</a>
             <h1>Produtos</h1>
+            <a href="#log" data-rel="dialog" data-transition="slidedown" class="ui-btn-right ui-btn ui-btn-inline ui-mini ui-corner-all ui-btn-icon-right ui-icon-eye">Ver Comanda</a>
         </div>
-        <div data-role="main" class="ui-content">
+        <div data-role="main" class="ui-content" id="contentProdutos">
+            
         </div>
 
         <div data-role="footer" data-position="fixed">
@@ -85,7 +90,17 @@
             </div>
         </div>
     </div>
-
+        
+    <div data-role="dialog" id="log">
+        <div data-role="header">
+            <h1>Extrato Comanda</h1>
+        </div>
+        <div data-role="content">
+            <ul data-role='listview' data-filter='true' data-filter-placeholder='Pesquisa' id="comandaListview">
+            </ul>
+        </div>
+    </div>
+    
     <div data-role="page" id="listaMesas">
         <div data-role="header">
             <a href="#" data-icon="back" data-rel="back" title="Go back">Back</a>
@@ -110,5 +125,6 @@
     <script type="text/javascript" src="scripts/jquery.min.js"></script>
     <script type="text/javascript" src="scripts/jquery.mobile-1.4.5.js"></script>
     <script type="text/javascript" src="scripts/platformOverrides.js"></script>
+    <script type="text/javascript" src="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog2.min.js"></script>
 </body>
 </html>
