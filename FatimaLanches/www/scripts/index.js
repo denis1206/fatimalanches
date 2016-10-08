@@ -12,43 +12,123 @@
     host = "http://localhost:7541";
     
     function onDeviceReady() {
-        $("a[data-role=tab]").each(function () {
-            var anchor = $(this);
-            anchor.bind("click", function () {
-                console.log(anchor.attr("href"));
-                $.mobile.changePage(anchor.attr("href"), {
-                    transition: "none",
-                    changeHash: false
-                });
-            });
-        });
+        //(function ($) {
 
-        $("div[data-role=page]").bind("pagebeforeshow", function (e, data) {
-            $.mobile.silentScroll(0);
-            $.mobile.changePage.defaults.transition = 'slide';
-        });
+        //    // Before handling a page change...
+        //    $(document).bind("pagebeforechange", function (e, data) {
+        //        // If the new page is not being loaded by URL, bail
+        //        if (typeof data.toPage !== "string") {
+        //            return;
+        //        }
 
+        //        // If the new page has a corresponding navbar link, activate its content div
+        //        var url = $.mobile.path.parseUrl(data.toPage);
+        //        var $a = $("div[data-role='navbar'] a[href='" + url.hash + "']");
+        //        if ($a.length) {
+        //            // Suppress normal page change handling since we're handling it here for this case
+        //            e.preventDefault();
+        //        }
+        //            // If the new page has a navbar, activate the content div for its active item
+        //        else {
+        //            $a = $(url.hash + " div[data-role='navbar']").find("a.ui-btn-active");
+
+        //            // Allow normal page change handling to continue in this case so the new page finishes rendering
+        //        }
+
+        //        // Show the content div to be activated and hide other content divs for this page
+        //        var $content = $($a.attr("href"));
+        //        $content.siblings().hide();
+        //        $content.show();
+        //    });
+
+        //})(jQuery);
+        
         $('#teste').on('click', function () {
             if ($('#number').val() == '') {
-                $('#purchase p').html('Digite o número da mesa');
-                $("#purchase").popup("open");
+                $('<div>').simpledialog2({
+                    mode: 'button',
+                    headerText: 'Atenção',
+                    headerClose: true,
+                    buttonPrompt: 'Digite o número da mesa',
+                    buttons: {
+                        'OK': {
+                            click: function () {
+                            },
+                        }
+                    },
+                });
             } else {
                 if ($('#number').val() <= 0 || $('#number').val() > 12) {
-                    $('#purchase p').html('Digite um número entre 1 e 12');
-                    $("#purchase").popup("open");
-                }else{
-                    $.ajax({
-                        type: "POST",
-                        url: host + "/minhaapi/insertComanda.php?mesa="+$("#number").val(),
-                        success: function (result) {
-                            $('#purchase p').html('Comanda cadastrada com sucesso!');
-                            $("#purchase").popup("open");
-                            listaComandas();
+
+                    $('<div>').simpledialog2({
+                        mode: 'button',
+                        headerText: 'Atenção',
+                        headerClose: true,
+                        buttonPrompt: 'Digite um número entre 1 e 12',
+                        buttons: {
+                            'OK': {
+                                click: function () {
+                                },
+                            }
                         },
-                        error: function (e) {
-                            console.log('Error: ' + e.message);
+                    })
+                } else {
+                    
+
+                    $.ajax({
+                        type: "GET",
+                        url: host + "/minhaapi/getUltimaComanda.php",
+                        dataType: "json",
+                        crossDomain: true,
+                        cache: false,
+                        success: function (result) {
+                            console.log(result[0].idcomanda);
+                            console.log($("#number").val());
+
+                            $('#numeroMesa').text($("#number").val());
+                            $('#idComanda').text(result[0].idcomanda + 1);
+
+                            $.mobile.changePage("#listaProdutos", { transition: "slideup", changeHash: false });
+                            $('<div>').simpledialog2({
+                                mode: 'button',
+                                headerText: 'Ateñção',
+                                headerClose: true,
+                                buttonPrompt: 'Comanda cadastrada com sucesso!',
+                                buttons: {
+                                    'OK': {
+                                        click: function () {
+                                        },
+                                    }
+                                }
+                            })
                         }
                     });
+
+                    //$.ajax({
+                    //    type: "POST",
+                    //    url: host + "/minhaapi/insertComanda.php?mesa="+$("#number").val(),
+                    //    success: function (result) {
+                    //        $.mobile.changePage("#listaProdutos", { transition: "slideup", changeHash: false });
+                    //        $('<div>').simpledialog2({
+                    //            mode: 'button',
+                    //            headerText: 'Ateñção',
+                    //            headerClose: true,
+                    //            buttonPrompt: 'Comanda cadastrada com sucesso!',
+                    //            buttons: {
+                    //                'OK': {
+                    //                    click: function () {
+                    //                    },
+                    //                }
+                    //            }
+                    //        })
+                            //$('#purchase p').html('Comanda cadastrada com sucesso!');
+                            //$("#purchase").popup("open");
+                            //listaComandas();
+                    //    },
+                    //    error: function (e) {
+                    //        console.log('Error: ' + e.message);
+                    //    }
+                    //});
                 }
             }
 
@@ -62,10 +142,17 @@
 
             var id = $(this).attr('id');
 
-            lista = "<li><a href='#'>" + $(this).text() + "</a><a href='#' data-icon='delete' id='rmv_" + id + "' class='rmvProduto'>Purchase album</a></li>";
+            lista = "<li id=" + id + "><a href='#'>" + $(this).text() + "</a><a href='#' data-icon='delete' id='rmv_" + id + "' class='rmvProduto'>Purchase album</a></li>";
 
             $('#comandaListview').append(lista);
             $('#comandaListview').listview().listview('refresh');
+
+            $('#msg p').html('Item adicionado a comanda!');
+            $("#msg").popup().popup("open");
+
+            setTimeout(function () {
+                $("#msg").popup().popup("close");
+            }, 2000);
         });
 
         $('body').on('click', '.rmvProduto', function (e) {
@@ -121,7 +208,7 @@
                                 collapse += "<h3>" + categoria + "</h3>";
                                 collapse += "<ul data-role='listview' data-filter='true' data-filter-placeholder='Pesquisa'>";
                             }
-                            collapse += "<li data-icon='plus'><a href='#' id='" + result[i].idproduto + "' class='adcProduto'>" + result[i].descricaoproduto + "</a></li>";
+                            collapse += "<li data-icon='plus'><a href='#' id='prod_" + result[i].idproduto + "' class='adcProduto'>" + result[i].descricaoproduto + "</a></li>";
                         }
                         $('#contentProdutos').append(collapse);
                     }
@@ -133,6 +220,60 @@
         }
 
         listaProdutoSetor();
+
+        $('#cadastrarPedido').on('click', function (e) {
+            var id = null;
+
+            e.preventDefault();
+
+            if ($('#comandaListview li').length != 0) {
+                $('#comandaListview').find('li').each(function () {
+                    id = parseInt($(this).attr('id').replace("prod_", ""));
+
+                    $.ajax({
+                        type: "POST",
+                        url: host + "/minhaapi/insertItemComanda.php?idcomanda=100&idproduto=" + id + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&numeromesa=10",
+                        success: function (result) {
+                            console.log('Cadastrou!');
+                        },
+                        error: function (e) {
+                            console.log('Error: ' + e.message);
+                        }
+                    });
+
+                    $.mobile.changePage("#paginaPrincipal", { transition: "slideup", changeHash: false });
+                    $('<div>').simpledialog2({
+                        mode: 'button',
+                        headerText: 'Sucesso',
+                        headerClose: true,
+                        buttonPrompt: 'Pedido cadastrado com sucesso!',
+                        buttons: {
+                            'OK': {
+                                click: function () {
+                                },
+                            }
+                        }
+                    });
+
+                    $('#comandaListview').find('li').each(function () {
+                        $(this).remove();
+                    });
+                });
+            } else {
+                $('<div>').simpledialog2({
+                    mode: 'button',
+                    headerText: 'Atenção',
+                    headerClose: true,
+                    buttonPrompt: 'A comanda está vazia, adicione um produto!',
+                    buttons: {
+                        'OK': {
+                            click: function () {
+                            },
+                        }
+                    },
+                })
+            }
+        });
 
         function listaComandas(){
             $("#listaComandas").html('');

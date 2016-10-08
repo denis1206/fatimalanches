@@ -11,7 +11,7 @@
         <link rel="stylesheet" type="text/css" href="css/index.css">
         <link rel="stylesheet" type="text/css" href="css/jquery.mobile-1.4.5.min.css">
         <link rel="stylesheet" type="text/css" href="css/jquery.mobile.theme-1.4.5.min.css">
-        <link rel="stylesheet" type="text/css" href="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog.min.css" />
+        <link rel="stylesheet" type="text/css" href="css/jquery.mobile.simpledialog.min.css" />
 
         <title>Comanda 2.0</title>
 
@@ -62,11 +62,8 @@
             <button id="teste">Cadastrar</button>
         </div>
 
-        <div data-role="popup" id="purchase" data-theme="a" data-overlay-theme="b" class="ui-content" style="max-width:340px; padding-bottom:2em;">
-            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
-            <h3>Atenção</h3>
+        <div data-role="popup" id="msg" data-theme="a" class="ui-content">
             <p></p>
-            <a href="index.html" data-rel="back" class="ui-shadow ui-btn ui-corner-all ui-btn-inline ui-mini">OK</a>
         </div>
     </div>
 
@@ -83,21 +80,26 @@
         <div data-role="footer" data-position="fixed">
             <div data-role="navbar">
                 <ul>
-                    <li><a href="#paginaPrincipal" data-role="tab" data-icon="grid">Comandas</a></li>
-                    <li><a href="#listaProdutos" data-role="tab" data-icon="grid" class="ui-btn-active">Produtos</a></li>
-                    <li><a href="#listaMesas" data-role="tab" data-icon="grid">Mesas</a></li>
+                    <li><a data-role="button" data-icon="plus">Cadastrar Pedido</a></li>
                 </ul>
             </div>
         </div>
     </div>
         
     <div data-role="dialog" id="log">
-        <div data-role="header">
-            <h1>Extrato Comanda</h1>
-        </div>
+        <div data-role="header" data-theme="b" role="banner" class="ui-header ui-bar-b">
+            <a href="#listaProdutos" class="ui-btn ui-corner-all ui-icon-delete ui-btn-icon-notext ui-btn-left">Close</a>
+		    <h1 class="ui-title" role="heading" aria-level="1">Extrato Comanda  Nº <span id="idComanda"></span></h1>
+		</div>
         <div data-role="content">
+            <span >Mesa:</span>
+            <span id="numeroMesa"></span>
             <ul data-role='listview' data-filter='true' data-filter-placeholder='Pesquisa' id="comandaListview">
             </ul>
+        </div>
+
+        <div data-role="footer" data-position="fixed">
+            <a href="index.html" data-role="button" data-icon="plus" id="cadastrarPedido">Cadastrar Pedido</a>
         </div>
     </div>
     
@@ -109,7 +111,7 @@
         <div data-role="main" class="ui-content">
         </div>
 
-        <div data-role="footer" data-position="fixed">
+        <!--<div data-role="footer" data-position="fixed">
             <div data-role="navbar">
                 <ul>
                     <li><a href="#paginaPrincipal" data-role="tab" data-icon="grid">Comandas</a></li>
@@ -117,7 +119,7 @@
                     <li><a href="#listaMesas" data-role="tab" data-icon="grid" class="ui-btn-active">Mesas</a></li>
                 </ul>
             </div>
-        </div>
+        </div>-->
     </div>
 
     <script type="text/javascript" src="cordova.js"></script>
@@ -125,6 +127,7 @@
     <script type="text/javascript" src="scripts/jquery.min.js"></script>
     <script type="text/javascript" src="scripts/jquery.mobile-1.4.5.js"></script>
     <script type="text/javascript" src="scripts/platformOverrides.js"></script>
-    <script type="text/javascript" src="http://dev.jtsage.com/cdn/simpledialog/latest/jquery.mobile.simpledialog2.min.js"></script>
+    <script type="text/javascript" src="scripts/jquery.mobile.simpledialog2.min.js"></script>
+    <script type="text/javascript" src="scripts/moment.js"></script>
 </body>
 </html>
