@@ -58,6 +58,7 @@
                     },
                 });
             } else {
+                //if (!$('#number').val().match(/^\d+$/)) { console.log('Não é um número!'); } else { console.log('É um número!'); }
                 if ($('#number').val() <= 0 || $('#number').val() > 12) {
 
                     $('<div>').simpledialog2({
@@ -82,16 +83,13 @@
                         crossDomain: true,
                         cache: false,
                         success: function (result) {
-                            console.log(result[0].idcomanda);
-                            console.log($("#number").val());
-
                             $('#numeroMesa').text($("#number").val());
                             $('#idComanda').text(result[0].idcomanda + 1);
 
                             $.mobile.changePage("#listaProdutos", { transition: "slideup", changeHash: false });
                             $('<div>').simpledialog2({
                                 mode: 'button',
-                                headerText: 'Ateñção',
+                                headerText: 'Atenção',
                                 headerClose: true,
                                 buttonPrompt: 'Comanda cadastrada com sucesso!',
                                 buttons: {
@@ -103,32 +101,6 @@
                             })
                         }
                     });
-
-                    //$.ajax({
-                    //    type: "POST",
-                    //    url: host + "/minhaapi/insertComanda.php?mesa="+$("#number").val(),
-                    //    success: function (result) {
-                    //        $.mobile.changePage("#listaProdutos", { transition: "slideup", changeHash: false });
-                    //        $('<div>').simpledialog2({
-                    //            mode: 'button',
-                    //            headerText: 'Ateñção',
-                    //            headerClose: true,
-                    //            buttonPrompt: 'Comanda cadastrada com sucesso!',
-                    //            buttons: {
-                    //                'OK': {
-                    //                    click: function () {
-                    //                    },
-                    //                }
-                    //            }
-                    //        })
-                            //$('#purchase p').html('Comanda cadastrada com sucesso!');
-                            //$("#purchase").popup("open");
-                            //listaComandas();
-                    //    },
-                    //    error: function (e) {
-                    //        console.log('Error: ' + e.message);
-                    //    }
-                    //});
                 }
             }
 
@@ -142,7 +114,7 @@
 
             var id = $(this).attr('id');
 
-            lista = "<li id=" + id + "><a href='#'>" + $(this).text() + "</a><a href='#' data-icon='delete' id='rmv_" + id + "' class='rmvProduto'>Purchase album</a></li>";
+            lista = "<li id=" + id + "><a href=''>" + $(this).text() + "</a><a href='#' data-icon='delete' id='rmv_" + id + "' class='rmvProduto'>Purchase album</a></li>";
 
             $('#comandaListview').append(lista);
             $('#comandaListview').listview().listview('refresh');
@@ -151,7 +123,7 @@
             $("#msg").popup().popup("open");
 
             setTimeout(function () {
-                $("#msg").popup().popup("close");
+                $("#msg").popup("close");
             }, 2000);
         });
 
@@ -227,14 +199,37 @@
             e.preventDefault();
 
             if ($('#comandaListview li').length != 0) {
+                $.ajax({
+                        type: "POST",
+                        url: host + "/minhaapi/insertComanda.php",
+                        success: function (result) {
+                            //$.mobile.changePage("#listaProdutos", { transition: "slideup", changeHash: false });
+                            //$('<div>').simpledialog2({
+                            //    mode: 'button',
+                            //    headerText: 'Ateñção',
+                            //    headerClose: true,
+                            //    buttonPrompt: 'Comanda cadastrada com sucesso!',
+                            //    buttons: {
+                            //        'OK': {
+                            //            click: function () {
+                            //            },
+                            //        }
+                            //    }
+                            //})
+                            listaComandas();
+                        },
+                        error: function (e) {
+                            console.log('Error: ' + e.message);
+                        }
+                    });
+
                 $('#comandaListview').find('li').each(function () {
                     id = parseInt($(this).attr('id').replace("prod_", ""));
 
                     $.ajax({
                         type: "POST",
-                        url: host + "/minhaapi/insertItemComanda.php?idcomanda=100&idproduto=" + id + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&numeromesa=10",
+                        url: host + "/minhaapi/insertItemComanda.php?idcomanda=" + $('#idComanda').text() + "&idproduto=" + id + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&numeromesa=" + $('#numeroMesa').text(),
                         success: function (result) {
-                            console.log('Cadastrou!');
                         },
                         error: function (e) {
                             console.log('Error: ' + e.message);
@@ -294,8 +289,8 @@
                             div = "<li>";
                             div += "<a href='#'>";
                             div += "<img src='images/iconePedido.png' />";
-                            div += "<h2>Comanda: " + field.idnumber + "</h2>";
-                            div += "<p>Mesa: " + field.mesa + "</p>";
+                            div += "<h2>Comanda: " + field.idcomanda + "</h2>";
+                            div += "<p>Mesa: " + field.numeromesa + "</p>";
                             div += "<p>Status: ";
                             (field.status) ? div += "Aberta" : div += "Fechada";
                             div += "</p>";

@@ -30,7 +30,7 @@
             <div class="chooseBtn"><a href="#novaComanda" data-transition="slide">Abrir Nova Comanda</a></div>
             <div class="chooseBtn"><a href="#comandasAbertas" data-transition="slide">Comandas Abertas</a></div>
         </div>
-        <div data-role="footer" data-position="fixed">
+        <!--<div data-role="footer" data-position="fixed">
             <div data-role="navbar">
                 <ul>
                     <li><a href="#paginaPrincipal" data-role="tab" data-icon="grid" class="ui-btn-active">Comandas</a></li>
@@ -38,12 +38,12 @@
                     <li><a href="#listaMesas" data-role="tab" data-icon="grid">Mesas</a></li>
                 </ul>
             </div>
-        </div>
+        </div>-->
     </div>
 
     <div data-role="page" id="comandasAbertas">
         <div data-role="header">
-            <a href="#" data-icon="back" data-rel="back" title="Voltar">Voltar</a>
+            <a href="#paginaPrincipal" data-icon="back" data-history="false" title="Voltar">Voltar</a>
             <h1>Comandas</h1>
         </div>
         <div data-role="main" class="ui-content">
@@ -58,18 +58,18 @@
             <h1>Nova Comanda</h1>
         </div>
         <div data-role="main" class="ui-content">
-            <input type="number" name="number" id="number" value="" min="1" max="12" step="1" class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset" placeholder="Digite o número da mesa">
+            <input type="number" name="number" id="number" value="" min="1" max="12" step="1" class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset" placeholder="Digite o número da mesa" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')">
             <button id="teste">Cadastrar</button>
         </div>
 
-        <div data-role="popup" id="msg" data-theme="a" class="ui-content">
+        <div data-role="popup" id="msg" data-theme="a" class="ui-content" data-history="false">
             <p></p>
         </div>
     </div>
 
     <div data-role="page" id="listaProdutos">
         <div data-role="header">
-            <a href="#" data-icon="back" data-rel="back" title="Go back" class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-back">Voltar</a>
+            <a href="#paginaPrincipal" data-icon="back" data-history="false" title="Go back" class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-back">Voltar</a>
             <h1>Produtos</h1>
             <a href="#log" data-rel="dialog" data-transition="slidedown" class="ui-btn-right ui-btn ui-btn-inline ui-mini ui-corner-all ui-btn-icon-right ui-icon-eye">Ver Comanda</a>
         </div>
@@ -77,13 +77,13 @@
             
         </div>
 
-        <div data-role="footer" data-position="fixed">
+        <!--<div data-role="footer" data-position="fixed">
             <div data-role="navbar">
                 <ul>
                     <li><a data-role="button" data-icon="plus">Cadastrar Pedido</a></li>
                 </ul>
             </div>
-        </div>
+        </div>-->
     </div>
         
     <div data-role="dialog" id="log">
@@ -129,5 +129,8 @@
     <script type="text/javascript" src="scripts/platformOverrides.js"></script>
     <script type="text/javascript" src="scripts/jquery.mobile.simpledialog2.min.js"></script>
     <script type="text/javascript" src="scripts/moment.js"></script>
+    <script>
+        $('#msg').popup({ zIndex: 3999 });
+    </script>
 </body>
 </html>
