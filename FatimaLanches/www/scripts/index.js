@@ -8,42 +8,14 @@
     document.addEventListener('deviceready', onDeviceReady.bind(this), false);
 
     var host;
-    //host = "http://192.168.0.13:7541";
-    host = "http://localhost:7541";
+    //host = "https://stormy-ravine-22148.herokuapp.com/";
+    host = "http://localhost:7541/minhaapi/";
     
     function onDeviceReady() {
-        //(function ($) {
-
-        //    // Before handling a page change...
-        //    $(document).bind("pagebeforechange", function (e, data) {
-        //        // If the new page is not being loaded by URL, bail
-        //        if (typeof data.toPage !== "string") {
-        //            return;
-        //        }
-
-        //        // If the new page has a corresponding navbar link, activate its content div
-        //        var url = $.mobile.path.parseUrl(data.toPage);
-        //        var $a = $("div[data-role='navbar'] a[href='" + url.hash + "']");
-        //        if ($a.length) {
-        //            // Suppress normal page change handling since we're handling it here for this case
-        //            e.preventDefault();
-        //        }
-        //            // If the new page has a navbar, activate the content div for its active item
-        //        else {
-        //            $a = $(url.hash + " div[data-role='navbar']").find("a.ui-btn-active");
-
-        //            // Allow normal page change handling to continue in this case so the new page finishes rendering
-        //        }
-
-        //        // Show the content div to be activated and hide other content divs for this page
-        //        var $content = $($a.attr("href"));
-        //        $content.siblings().hide();
-        //        $content.show();
-        //    });
-
-        //})(jQuery);
         
-        $('#teste').on('click', function () {
+        $('#criarPedido').on('click', function () {
+            $('#atualizarPedido').hide();
+
             if ($('#number').val() == '') {
                 $('<div>').simpledialog2({
                     mode: 'button',
@@ -78,7 +50,7 @@
 
                     $.ajax({
                         type: "GET",
-                        url: host + "/minhaapi/getUltimaComanda.php",
+                        url: host + "getUltimaComanda.php",
                         dataType: "json",
                         crossDomain: true,
                         cache: false,
@@ -101,13 +73,70 @@
                             })
                         }
                     });
+
+                    setTimeout(function () {
+                        $.mobile.sdCurrentDialog.close();
+                    }, 2000);
                 }
             }
 
             
         });
 
-        var lista = "";
+        var lista = null;
+
+        $('body').on('click', '.edtComanda', function (e) {
+            e.preventDefault();
+
+            $('#idComanda').text($(this).attr('id'));
+
+            $('#numeroMesa').text($(this).attr('mesa'));
+
+            $('#cadastrarPedido').hide();
+
+            $.ajax({
+                type: "GET",
+                url: host + "getItemcomanda.php?idcomanda="+$(this).attr('id'),
+                dataType: "json",
+                crossDomain: true,
+                cache: false,
+                success: function (result) {
+                    $.each(result, function (i, field) {
+                        lista = "<li id=" + field.idproduto + "><a href=''>" + field.descricaoproduto + "</a><a href='#' data-icon='delete' id='rmv_" + field.idproduto + "' class='rmvProduto'></a></li>";
+                        console.log(lista);
+                        $('#comandaListview').append(lista);
+                        $('#comandaListview').listview().listview('refresh');
+                    });
+                },
+                error: function (e) {
+                    console.log('Error: ' + e.message);
+                }
+            });
+
+            console.log('Editar comanda ' + $(this).attr('id'));
+
+            $.mobile.changePage("#listaProdutos", { transition: "slideup", changeHash: false });
+
+            $.mobile.changePage("#log", { transition: "slidedown", changeHash: false });
+
+            //$('#comandaListview').find('li').each(function () {
+            //    id = parseInt($(this).attr('id').replace("prod_", ""));
+
+            //    $.ajax({
+            //        type: "POST",
+            //        url: host + "insertItemComanda.php?idcomanda=" + $('#idComanda').text() + "&idproduto=" + id + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&numeromesa=" + $('#numeroMesa').text(),
+            //        success: function (result) {
+            //        },
+            //        error: function (e) {
+            //            console.log('Error: ' + e.message);
+            //        }
+            //    });
+
+            //    $.mobile.changePage("#paginaPrincipal", { transition: "slideup", changeHash: false });
+            //});
+
+
+        });
 
         $('body').on('click', '.adcProduto', function (e) {
             e.preventDefault();
@@ -119,12 +148,12 @@
             $('#comandaListview').append(lista);
             $('#comandaListview').listview().listview('refresh');
 
-            $('#msg p').html('Item adicionado a comanda!');
+            $('#msg p').html('Item ' + $(this).text() + ' adicionado a comanda!');
             $("#msg").popup().popup("open");
 
             setTimeout(function () {
                 $("#msg").popup("close");
-            }, 2000);
+            }, 1000);
         });
 
         $('body').on('click', '.rmvProduto', function (e) {
@@ -157,7 +186,7 @@
         function listaProdutoSetor() {
             $.ajax({
                 type: "GET",
-                url: host + "/minhaapi/getProdutoSetor.php",
+                url: host + "getProdutoSetor.php",
                 dataType: "json",
                 crossDomain: true,
                 cache: false,
@@ -193,42 +222,28 @@
 
         listaProdutoSetor();
 
-        $('#cadastrarPedido').on('click', function (e) {
+        $('#atualizarPedido').on('click', function (e) {
             var id = null;
 
             e.preventDefault();
 
             if ($('#comandaListview li').length != 0) {
                 $.ajax({
-                        type: "POST",
-                        url: host + "/minhaapi/insertComanda.php",
-                        success: function (result) {
-                            //$.mobile.changePage("#listaProdutos", { transition: "slideup", changeHash: false });
-                            //$('<div>').simpledialog2({
-                            //    mode: 'button',
-                            //    headerText: 'Ateñção',
-                            //    headerClose: true,
-                            //    buttonPrompt: 'Comanda cadastrada com sucesso!',
-                            //    buttons: {
-                            //        'OK': {
-                            //            click: function () {
-                            //            },
-                            //        }
-                            //    }
-                            //})
-                            listaComandas();
-                        },
-                        error: function (e) {
-                            console.log('Error: ' + e.message);
-                        }
-                    });
+                    type: "POST",
+                    url: host + "deleteItemComanda.php?idcomanda="+$('#idComanda').text(),
+                    success: function (result) {
+                    },
+                    error: function (e) {
+                        console.log('Error: ' + e.message);
+                    }
+                });
 
                 $('#comandaListview').find('li').each(function () {
                     id = parseInt($(this).attr('id').replace("prod_", ""));
 
                     $.ajax({
                         type: "POST",
-                        url: host + "/minhaapi/insertItemComanda.php?idcomanda=" + $('#idComanda').text() + "&idproduto=" + id + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&numeromesa=" + $('#numeroMesa').text(),
+                        url: host + "insertItemComanda.php?idcomanda=" + $('#idComanda').text() + "&idproduto=" + id + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&numeromesa=" + $('#numeroMesa').text(),
                         success: function (result) {
                         },
                         error: function (e) {
@@ -250,6 +265,95 @@
                         }
                     });
 
+                    setTimeout(function () {
+                        $(document).trigger('simpledialog', { 'method': 'close' });
+                    }, 2000);
+
+                    $('#comandaListview').find('li').each(function () {
+                        $(this).remove();
+                    });
+                });
+            } else {
+                $('<div>').simpledialog2({
+                    mode: 'button',
+                    headerText: 'Atenção',
+                    headerClose: true,
+                    buttonPrompt: 'A comanda está vazia, adicione um produto!',
+                    buttons: {
+                        'OK': {
+                            click: function () {
+                            },
+                        }
+                    },
+                });
+            }
+
+            setTimeout(function () {
+                $.mobile.sdCurrentDialog.close();
+            }, 2000);
+        });
+
+        $('#cadastrarPedido').on('click', function (e) {
+            var id = null;
+
+            e.preventDefault();
+
+            if ($('#comandaListview li').length != 0) {
+                $.ajax({
+                    type: "POST",
+                    url: host + "insertComanda.php",
+                    success: function (result) {
+                        //$.mobile.changePage("#listaProdutos", { transition: "slideup", changeHash: false });
+                        //$('<div>').simpledialog2({
+                        //    mode: 'button',
+                        //    headerText: 'Ateñção',
+                        //    headerClose: true,
+                        //    buttonPrompt: 'Comanda cadastrada com sucesso!',
+                        //    buttons: {
+                        //        'OK': {
+                        //            click: function () {
+                        //            },
+                        //        }
+                        //    }
+                        //})
+                        listaComandas();
+                    },
+                    error: function (e) {
+                        console.log('Error: ' + e.message);
+                    }
+                });
+
+                $('#comandaListview').find('li').each(function () {
+                    id = parseInt($(this).attr('id').replace("prod_", ""));
+                    
+                    $.ajax({
+                        type: "POST",
+                        url: host + "insertItemComanda.php?idcomanda=" + $('#idComanda').text() + "&idproduto=" + id + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&numeromesa=" + $('#numeroMesa').text(),
+                        success: function (result) {
+                        },
+                        error: function (e) {
+                            console.log('Error: ' + e.message);
+                        }
+                    });
+
+                    $.mobile.changePage("#paginaPrincipal", { transition: "slideup", changeHash: false });
+                    $('<div>').simpledialog2({
+                        mode: 'button',
+                        headerText: 'Sucesso',
+                        headerClose: true,
+                        buttonPrompt: 'Pedido cadastrado com sucesso!',
+                        buttons: {
+                            'OK': {
+                                click: function () {
+                                },
+                            }
+                        }
+                    });
+
+                    setTimeout(function () {
+                        $.mobile.sdCurrentDialog.close();
+                    }, 2000);
+
                     $('#comandaListview').find('li').each(function () {
                         $(this).remove();
                     });
@@ -268,6 +372,10 @@
                     },
                 })
             }
+
+            setTimeout(function () {
+                $.mobile.sdCurrentDialog.close();
+            }, 2000);
         });
 
         function listaComandas(){
@@ -275,7 +383,7 @@
             
             $.ajax({
                 type: "GET",
-                url: host + "/minhaapi/getComandas.php",
+                url: host + "getComandas.php",
                 dataType: "json",
                 crossDomain: true,
                 cache: false,
@@ -286,7 +394,7 @@
                     } else {
                         var div;
                         $.each(result, function (i, field) {
-                            div = "<li>";
+                            div = "<li id=" + field.idcomanda +" class='edtComanda' mesa="+ field.numeromesa +">";
                             div += "<a href='#'>";
                             div += "<img src='images/iconePedido.png' />";
                             div += "<h2>Comanda: " + field.idcomanda + "</h2>";
@@ -294,7 +402,7 @@
                             div += "<p>Status: ";
                             (field.status) ? div += "Aberta" : div += "Fechada";
                             div += "</p>";
-                            div += "</a>"
+                            div += "</a>";
                             div += "</li>";
                             $("#listaComandas").append(div);
                         });

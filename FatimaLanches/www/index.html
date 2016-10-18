@@ -19,6 +19,10 @@
             ::-webkit-scrollbar { 
                 display: none; 
             }
+
+            #msg p{
+                text-align: center; 
+            }
         </style>
     </head>
 <body>
@@ -58,8 +62,8 @@
             <h1>Nova Comanda</h1>
         </div>
         <div data-role="main" class="ui-content">
-            <input type="number" name="number" id="number" value="" min="1" max="12" step="1" class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset" placeholder="Digite o número da mesa" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')">
-            <button id="teste">Cadastrar</button>
+            <input type="text" name="number" id="number" value="" min="1" max="12" step="1" class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset" placeholder="Digite o número da mesa" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')">
+            <button id="criarPedido">Cadastrar</button>
         </div>
 
         <div data-role="popup" id="msg" data-theme="a" class="ui-content" data-history="false">
@@ -100,6 +104,7 @@
 
         <div data-role="footer" data-position="fixed">
             <a href="index.html" data-role="button" data-icon="plus" id="cadastrarPedido">Cadastrar Pedido</a>
+            <a href="index.html" data-role="button" data-icon="plus" id="atualizarPedido">Atualizar Pedido</a>
         </div>
     </div>
     
