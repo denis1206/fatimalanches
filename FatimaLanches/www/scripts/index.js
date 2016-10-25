@@ -12,7 +12,189 @@
     host = "http://localhost:7541/minhaapi/";
     
     function onDeviceReady() {
-        
+
+        var lista = null;
+
+        $('body').on('click', '.edtComanda', function (e) {
+            e.preventDefault();
+
+            $('#idComanda').text($(this).attr('id'));
+
+            $('#numeroMesa').text($(this).attr('mesa'));
+
+            $('#cadastrarPedido').hide();
+
+            $('#atualizarPedido').show().css('display', 'inline-block');
+
+            $.ajax({
+                type: "GET",
+                url: host + "getItemcomanda.php?idcomanda="+$(this).attr('id'),
+                dataType: "json",
+                crossDomain: true,
+                cache: false,
+                success: function (result) {
+                    lista = '';
+
+                    $.each(result, function (i, field) {
+                        lista += "<li id=" + field.idproduto + "><a href=''>" + field.descricaoproduto + "</a><a href='#' data-icon='delete' id='rmv_" + field.idproduto + "' class='rmvProduto'></a></li>";
+                    });
+
+                    $('#comandaListview').html(lista);
+                    $('#comandaListview').listview().listview('refresh');
+                },
+                error: function (e) {
+                    console.log('Error: ' + e.message);
+                }
+            });
+            
+            $.mobile.changePage("#listaProdutos", { transition: "slideup", changeHash: false });
+
+            $.mobile.changePage("#log", { transition: "slidedown", changeHash: false });
+
+            //$('#comandaListview').find('li').each(function () {
+            //    id = parseInt($(this).attr('id').replace("prod_", ""));
+
+            //    $.ajax({
+            //        type: "POST",
+            //        url: host + "insertItemComanda.php?idcomanda=" + $('#idComanda').text() + "&idproduto=" + id + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&numeromesa=" + $('#numeroMesa').text(),
+            //        success: function (result) {
+            //        },
+            //        error: function (e) {
+            //            console.log('Error: ' + e.message);
+            //        }
+            //    });
+
+            //    $.mobile.changePage("#paginaPrincipal", { transition: "slideup", changeHash: false });
+            //});
+
+
+        });
+
+        $('body').on('click', '.adcProduto', function (e) {
+            e.preventDefault();
+
+            var itemcomanda = null, idproduto = $(this).attr('id'), produto = $(this).text();
+
+            $('#comandaListview').hide();
+
+            $.ajax({
+                type: "GET",
+                url: host + "getUltimoItemComanda.php",
+                dataType: "json",
+                crossDomain: true,
+                cache: false,
+                success: function (result) {
+                    $.each(result, function (i, field) {
+                        itemcomanda = field.iditemcomanda;
+                    });
+                    
+                },
+                error: function () {
+
+                }
+            });
+            
+            $.ajax({
+                type: "GET",
+                url: host + "getCaracteristicaProduto.php?idproduto=" + $(this).attr('id'),
+                dataType: "json",
+                crossDomain: true,
+                cache: false,
+                success: function (result) {
+                    itemcomanda++;
+                    lista = '';
+                    lista = "<div data-role='collapsible' data-collapsed='false' data-inset='false' id='teste' itemcomanda='" + itemcomanda + "' idproduto='"+idproduto+"'>";
+                    lista += "<h1>" + produto + "</h1>";
+                    $.each(result, function (i, field) {
+                        //lista += "<li>";
+                        lista += "<div idprodutocaracteristica='"+field.id+"'>";
+                        lista += "<select id='select" + i + "' data-role='flipswitch' class='flipswitch'>";
+                        lista += "<option value='com' selected>COM</option>";
+                        lista += "<option value='sem'>SEM</option>";
+                        lista += "</select>";
+                        lista += "<span id='ingrediente" + i + "'>" + field.descricaocaracteristica + "</span>";
+                        lista += "</div>";
+                        //lista += "</li>";
+                    });
+                    lista += "</div>";
+                    lista += "<div data-role='collapsible' data-inset='false'>";
+                    lista += "<h1>Adicional</h1>";
+                    lista += "</div>";
+                    $("#any").html(lista).enhanceWithin();
+                    //$('#comandaListview').listview().listview('refresh');
+
+                },
+                error: function (e) {
+                    console.log('Error: ' + e.message);
+                }
+            });
+
+            $.mobile.changePage("#log", { transition: "slidedown", changeHash: false });
+
+            //var id = $(this).attr('id');
+
+            //lista = "<li id=" + id + "><a href=''>" + $(this).text() + "</a><a href='#' data-icon='delete' id='rmv_" + id + "' class='rmvProduto'>Purchase album</a></li>";
+
+
+            //$('#comandaListview').append(lista);
+            //$('#comandaListview').listview().listview('refresh');
+
+            //if ($('#comandaListview li').length != 0){
+            //    $('.badge').show().html($('#comandaListview li').length);
+            //}
+
+            //$('#msg p').html('Item ' + $(this).text() + ' adicionado a comanda!');
+            //$("#msg").popup().popup("open");
+
+            //setTimeout(function () {
+            //    $("#msg").popup("close");
+            //}, 1000);
+        });
+
+        $('#adicionarProduto').on('click', function (e) {
+            e.preventDefault();
+
+            $('#any').find('.ui-collapsible-content div').each(function (index) {
+                if ($('#select' + index + ' option:selected').text() == "SEM")
+                    console.log('ID Produto Caracteristica: ' + $("[idprodutocaracteristica]").attr('idprodutocaracteristica'), 'Descrição ' + $('#select' + index + ' option:selected').text() + ' ' + $('#ingrediente' + index).text().toUpperCase(), 'ID Comanda ' + $('#idComanda').text(), 'ID Produto: ' + $("[idproduto]").attr('idproduto') + ' Item Comanda: ' + $("[itemcomanda]").attr('itemcomanda'));
+            });
+            
+        });
+
+        $('body').on('click', '.rmvProduto', function (e) {
+            e.preventDefault();
+
+            var id = $(this).attr('id');
+
+            $('<div>').simpledialog2({
+                mode: 'button',
+                headerText: 'Confirmação',
+                headerClose: true,
+                buttonPrompt: 'Deseja excluir o item ' +  $(this).prev().text() + ' da comanda?',
+                buttons: {
+                    'Sim': {
+                        click: function () {
+                            $('#' + id).parent().remove();
+                            $('#comandaListview').listview().listview('refresh');
+
+                            if ($('#comandaListview li').length != 0) {
+                                $('.badge').show().html($('#comandaListview li').length);
+                            } else {
+                                $('.badge').hide();
+                                $.mobile.sdCurrentDialog.close();
+                            }
+                        },
+                        icon: "delete",
+                        theme: "c"
+                    },
+                    'Não': {
+                        click: function () {
+                        },
+                    }
+                }
+            })
+        });
+
         $('#criarPedido').on('click', function () {
             $('#atualizarPedido').hide();
 
@@ -46,7 +228,7 @@
                         },
                     })
                 } else {
-                    
+
 
                     $.ajax({
                         type: "GET",
@@ -70,7 +252,15 @@
                                         },
                                     }
                                 }
-                            })
+                            });
+
+                            console.log('Criou e limpou!');
+
+                            $('#cadastrarPedido').show().css('display', 'inline-block');
+
+                            $('#comandaListview').html('');
+
+                            $('.badge').hide().html('');
                         }
                     });
 
@@ -80,147 +270,97 @@
                 }
             }
 
-            
+
         });
 
-        var lista = null;
+        $('#cadastrarPedido').on('click', function (e) {
+            var id = null;
 
-        $('body').on('click', '.edtComanda', function (e) {
             e.preventDefault();
 
-            $('#idComanda').text($(this).attr('id'));
+            if ($('#comandaListview li').length != 0) {
+                $.ajax({
+                    type: "POST",
+                    url: host + "insertComanda.php",
+                    success: function (result) {
+                        //$.mobile.changePage("#listaProdutos", { transition: "slideup", changeHash: false });
+                        //$('<div>').simpledialog2({
+                        //    mode: 'button',
+                        //    headerText: 'Ateñção',
+                        //    headerClose: true,
+                        //    buttonPrompt: 'Comanda cadastrada com sucesso!',
+                        //    buttons: {
+                        //        'OK': {
+                        //            click: function () {
+                        //            },
+                        //        }
+                        //    }
+                        //})
+                        listaComandas();
+                    },
+                    error: function (e) {
+                        console.log('Error: ' + e.message);
+                    }
+                });
 
-            $('#numeroMesa').text($(this).attr('mesa'));
+                $('#comandaListview').find('li').each(function () {
+                    id = parseInt($(this).attr('id').replace("prod_", ""));
 
-            $('#cadastrarPedido').hide();
-
-            $.ajax({
-                type: "GET",
-                url: host + "getItemcomanda.php?idcomanda="+$(this).attr('id'),
-                dataType: "json",
-                crossDomain: true,
-                cache: false,
-                success: function (result) {
-                    $.each(result, function (i, field) {
-                        lista = "<li id=" + field.idproduto + "><a href=''>" + field.descricaoproduto + "</a><a href='#' data-icon='delete' id='rmv_" + field.idproduto + "' class='rmvProduto'></a></li>";
-                        console.log(lista);
-                        $('#comandaListview').append(lista);
-                        $('#comandaListview').listview().listview('refresh');
+                    $.ajax({
+                        type: "POST",
+                        url: host + "insertItemComanda.php?idcomanda=" + $('#idComanda').text() + "&idproduto=" + id + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&numeromesa=" + $('#numeroMesa').text(),
+                        success: function (result) {
+                        },
+                        error: function (e) {
+                            console.log('Error: ' + e.message);
+                        }
                     });
-                },
-                error: function (e) {
-                    console.log('Error: ' + e.message);
-                }
-            });
+                });
 
-            console.log('Editar comanda ' + $(this).attr('id'));
+                $('#comandaListview').html('');
 
-            $.mobile.changePage("#listaProdutos", { transition: "slideup", changeHash: false });
+                $('.badge').hide().html('');
 
-            $.mobile.changePage("#log", { transition: "slidedown", changeHash: false });
+                $.mobile.changePage("#paginaPrincipal", { transition: "slideup", changeHash: false });
+                $('<div>').simpledialog2({
+                    mode: 'button',
+                    headerText: 'Sucesso',
+                    headerClose: true,
+                    buttonPrompt: 'Pedido cadastrado com sucesso!',
+                    buttons: {
+                        'OK': {
+                            click: function () {
+                            },
+                        }
+                    }
+                });
 
-            //$('#comandaListview').find('li').each(function () {
-            //    id = parseInt($(this).attr('id').replace("prod_", ""));
+                setTimeout(function () {
+                    $.mobile.sdCurrentDialog.close();
+                }, 2000);
 
-            //    $.ajax({
-            //        type: "POST",
-            //        url: host + "insertItemComanda.php?idcomanda=" + $('#idComanda').text() + "&idproduto=" + id + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&numeromesa=" + $('#numeroMesa').text(),
-            //        success: function (result) {
-            //        },
-            //        error: function (e) {
-            //            console.log('Error: ' + e.message);
-            //        }
-            //    });
-
-            //    $.mobile.changePage("#paginaPrincipal", { transition: "slideup", changeHash: false });
-            //});
-
-
-        });
-
-        $('body').on('click', '.adcProduto', function (e) {
-            e.preventDefault();
-
-            var id = $(this).attr('id');
-
-            lista = "<li id=" + id + "><a href=''>" + $(this).text() + "</a><a href='#' data-icon='delete' id='rmv_" + id + "' class='rmvProduto'>Purchase album</a></li>";
-
-            $('#comandaListview').append(lista);
-            $('#comandaListview').listview().listview('refresh');
-
-            $('#msg p').html('Item ' + $(this).text() + ' adicionado a comanda!');
-            $("#msg").popup().popup("open");
+                $('#comandaListview').find('li').each(function () {
+                    $(this).remove();
+                });
+            } else {
+                $('<div>').simpledialog2({
+                    mode: 'button',
+                    headerText: 'Atenção',
+                    headerClose: true,
+                    buttonPrompt: 'A comanda está vazia, adicione um produto!',
+                    buttons: {
+                        'OK': {
+                            click: function () {
+                            },
+                        }
+                    },
+                })
+            }
 
             setTimeout(function () {
-                $("#msg").popup("close");
-            }, 1000);
+                $.mobile.sdCurrentDialog.close();
+            }, 2000);
         });
-
-        $('body').on('click', '.rmvProduto', function (e) {
-            e.preventDefault();
-
-            var id = $(this).attr('id');
-
-            $('<div>').simpledialog2({
-                mode: 'button',
-                headerText: 'Confirmação',
-                headerClose: true,
-                buttonPrompt: 'Deseja excluir o item ' +  $(this).prev().text() + ' da comanda?',
-                buttons: {
-                    'Sim': {
-                        click: function () {
-                            $('#' + id).parent().remove();
-                            $('#comandaListview').listview().listview('refresh');
-                        },
-                        icon: "delete",
-                        theme: "c"
-                    },
-                    'Não': {
-                        click: function () {
-                        },
-                    }
-                }
-            })
-        });
-
-        function listaProdutoSetor() {
-            $.ajax({
-                type: "GET",
-                url: host + "getProdutoSetor.php",
-                dataType: "json",
-                crossDomain: true,
-                cache: false,
-                success: function (result) {
-                    if (result == ""){
-                        var collapse = '<p>Nenhum registro encontrado</p>';
-                        $('#contentProdutos').append(collapse);
-
-                    } else {
-                        var categoria = null;
-                        var collapse = "";
-                        for (var i = 0; i < result.length; i++) {
-                            if (result[i].nome != categoria) {
-                                if (i != 0) {
-                                    collapse += "</ul>"
-                                    collapse += "</div>";
-                                }
-                                categoria = result[i].nome;
-                                collapse += "<div data-role='collapsible' data-iconpos='right' data-theme='b'>";
-                                collapse += "<h3>" + categoria + "</h3>";
-                                collapse += "<ul data-role='listview' data-filter='true' data-filter-placeholder='Pesquisa'>";
-                            }
-                            collapse += "<li data-icon='plus'><a href='#' id='prod_" + result[i].idproduto + "' class='adcProduto'>" + result[i].descricaoproduto + "</a></li>";
-                        }
-                        $('#contentProdutos').append(collapse);
-                    }
-                },
-                error: function (e) {
-                    console.log('Error: ' + e.message);
-                }
-            });
-        }
-
-        listaProdutoSetor();
 
         $('#atualizarPedido').on('click', function (e) {
             var id = null;
@@ -265,98 +405,17 @@
                         }
                     });
 
+                    $('#comandaListview').html('', function () {
+                        console.log('Limpou');
+                    });
+
+                    $('.badge').hide().html('');
+
                     setTimeout(function () {
                         $(document).trigger('simpledialog', { 'method': 'close' });
                     }, 2000);
 
-                    $('#comandaListview').find('li').each(function () {
-                        $(this).remove();
-                    });
-                });
-            } else {
-                $('<div>').simpledialog2({
-                    mode: 'button',
-                    headerText: 'Atenção',
-                    headerClose: true,
-                    buttonPrompt: 'A comanda está vazia, adicione um produto!',
-                    buttons: {
-                        'OK': {
-                            click: function () {
-                            },
-                        }
-                    },
-                });
-            }
-
-            setTimeout(function () {
-                $.mobile.sdCurrentDialog.close();
-            }, 2000);
-        });
-
-        $('#cadastrarPedido').on('click', function (e) {
-            var id = null;
-
-            e.preventDefault();
-
-            if ($('#comandaListview li').length != 0) {
-                $.ajax({
-                    type: "POST",
-                    url: host + "insertComanda.php",
-                    success: function (result) {
-                        //$.mobile.changePage("#listaProdutos", { transition: "slideup", changeHash: false });
-                        //$('<div>').simpledialog2({
-                        //    mode: 'button',
-                        //    headerText: 'Ateñção',
-                        //    headerClose: true,
-                        //    buttonPrompt: 'Comanda cadastrada com sucesso!',
-                        //    buttons: {
-                        //        'OK': {
-                        //            click: function () {
-                        //            },
-                        //        }
-                        //    }
-                        //})
-                        listaComandas();
-                    },
-                    error: function (e) {
-                        console.log('Error: ' + e.message);
-                    }
-                });
-
-                $('#comandaListview').find('li').each(function () {
-                    id = parseInt($(this).attr('id').replace("prod_", ""));
                     
-                    $.ajax({
-                        type: "POST",
-                        url: host + "insertItemComanda.php?idcomanda=" + $('#idComanda').text() + "&idproduto=" + id + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&numeromesa=" + $('#numeroMesa').text(),
-                        success: function (result) {
-                        },
-                        error: function (e) {
-                            console.log('Error: ' + e.message);
-                        }
-                    });
-
-                    $.mobile.changePage("#paginaPrincipal", { transition: "slideup", changeHash: false });
-                    $('<div>').simpledialog2({
-                        mode: 'button',
-                        headerText: 'Sucesso',
-                        headerClose: true,
-                        buttonPrompt: 'Pedido cadastrado com sucesso!',
-                        buttons: {
-                            'OK': {
-                                click: function () {
-                                },
-                            }
-                        }
-                    });
-
-                    setTimeout(function () {
-                        $.mobile.sdCurrentDialog.close();
-                    }, 2000);
-
-                    $('#comandaListview').find('li').each(function () {
-                        $(this).remove();
-                    });
                 });
             } else {
                 $('<div>').simpledialog2({
@@ -370,14 +429,14 @@
                             },
                         }
                     },
-                })
+                });
             }
 
             setTimeout(function () {
                 $.mobile.sdCurrentDialog.close();
             }, 2000);
         });
-
+        
         function listaComandas(){
             $("#listaComandas").html('');
             
@@ -415,7 +474,48 @@
             });
         };
 
+        function listaProdutoSetor() {
+            $.ajax({
+                type: "GET",
+                url: host + "getProdutoSetor.php",
+                dataType: "json",
+                crossDomain: true,
+                cache: false,
+                success: function (result) {
+                    if (result == "") {
+                        var collapse = '<p>Nenhum registro encontrado</p>';
+                        $('#contentProdutos').append(collapse);
+
+                    } else {
+                        var categoria = null;
+                        var collapse = "";
+                        for (var i = 0; i < result.length; i++) {
+                            if (result[i].nome != categoria) {
+                                if (i != 0) {
+                                    collapse += "</ul>"
+                                    collapse += "</div>";
+                                }
+                                categoria = result[i].nome;
+                                collapse += "<div data-role='collapsible' data-iconpos='right' data-theme='b'>";
+                                collapse += "<h3>" + categoria + "</h3>";
+                                collapse += "<ul data-role='listview' data-filter='true' data-sort='true' data-filter-placeholder='Pesquisa'>";
+                            }
+                            collapse += "<li data-icon='plus'><a href='#' id='" + result[i].idproduto + "' class='adcProduto'>" + result[i].descricaoproduto + "</a></li>";
+                        }
+                        $('#contentProdutos').append(collapse);
+                    }
+                },
+                error: function (e) {
+                    console.log('Error: ' + e.message);
+                }
+            });
+        }
+
         listaComandas();
+
+        listaProdutoSetor();
+
+
     };
 
     function onPause() {

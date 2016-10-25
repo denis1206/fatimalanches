@@ -23,6 +23,27 @@
             #msg p{
                 text-align: center; 
             }
+
+            .badge {
+              background: #BA070F;
+              color: #fff;
+              padding: 1px 7px;
+              position: absolute;
+              right: 12px;
+              top: 10px;
+              z-index: 999;
+              border-radius: .8em;
+              display: none;
+            }
+
+            .ui-flipswitch{
+                margin-right: 15px;
+            }
+
+            .ui-flipswitch-on{
+                color: #fff !important;
+                text-shadow: none !important;
+            }
         </style>
     </head>
 <body>
@@ -31,8 +52,8 @@
             <h1>Bem-vindo</h1>
         </div>
         <div data-role="main" class="ui-content" id="main">
-            <div class="chooseBtn"><a href="#novaComanda" data-transition="slide">Abrir Nova Comanda</a></div>
-            <div class="chooseBtn"><a href="#comandasAbertas" data-transition="slide">Comandas Abertas</a></div>
+            <div class="chooseBtn btn-primary"><a href="#novaComanda" data-transition="slide">Abrir Nova Comanda</a></div>
+            <div class="chooseBtn btn-primary"><a href="#comandasAbertas" data-transition="slide">Comandas Abertas</a></div>
         </div>
         <!--<div data-role="footer" data-position="fixed">
             <div data-role="navbar">
@@ -63,7 +84,7 @@
         </div>
         <div data-role="main" class="ui-content">
             <input type="text" name="number" id="number" value="" min="1" max="12" step="1" class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset" placeholder="Digite o número da mesa" onkeyup="if (/\D/g.test(this.value)) this.value = this.value.replace(/\D/g,'')">
-            <button id="criarPedido">Cadastrar</button>
+            <button id="criarPedido" class="btn-primary">Cadastrar</button>
         </div>
 
         <div data-role="popup" id="msg" data-theme="a" class="ui-content" data-history="false">
@@ -75,7 +96,8 @@
         <div data-role="header">
             <a href="#paginaPrincipal" data-icon="back" data-history="false" title="Go back" class="ui-btn-left ui-btn ui-btn-inline ui-mini ui-btn-icon-left ui-icon-back">Voltar</a>
             <h1>Produtos</h1>
-            <a href="#log" data-rel="dialog" data-transition="slidedown" class="ui-btn-right ui-btn ui-btn-inline ui-mini ui-corner-all ui-btn-icon-right ui-icon-eye">Ver Comanda</a>
+            <a href="#log" data-rel="dialog" data-transition="slidedown" class="ui-btn-right ui-btn ui-btn-inline ui-mini ui-corner-all" style="padding-right: 35px;">Ver Comanda</a>
+            <span class="badge"></span>
         </div>
         <div data-role="main" class="ui-content" id="contentProdutos">
             
@@ -97,14 +119,16 @@
 		</div>
         <div data-role="content">
             <span >Mesa:</span>
-            <span id="numeroMesa"></span>
+            <div id="numeroMesa"></div>
             <ul data-role='listview' data-filter='true' data-filter-placeholder='Pesquisa' id="comandaListview">
             </ul>
+            <div id="any"></div>
         </div>
 
         <div data-role="footer" data-position="fixed">
             <a href="index.html" data-role="button" data-icon="plus" id="cadastrarPedido">Cadastrar Pedido</a>
             <a href="index.html" data-role="button" data-icon="plus" id="atualizarPedido">Atualizar Pedido</a>
+            <a href="index.html" data-role="button" data-icon="plus" id="adicionarProduto">Adicionar Produto</a>
         </div>
     </div>
     
@@ -136,6 +160,10 @@
     <script type="text/javascript" src="scripts/moment.js"></script>
     <script>
         $('#msg').popup({ zIndex: 3999 });
+
+        $("[data-role='flipswitch']").flipswitch({
+            defaults: true
+        });
     </script>
 </body>
 </html>
