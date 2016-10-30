@@ -4,16 +4,16 @@
 // and then run "window.location.reload()" in the JavaScript Console.
 (function () {
     "use strict";
-    
+
     document.addEventListener('deviceready', onDeviceReady.bind(this), false);
 
     var host;
     //host = "https://stormy-ravine-22148.herokuapp.com/";
     host = "http://localhost:7541/minhaapi/";
-    
+
     function onDeviceReady() {
 
-        var lista = null;
+        var idproduto, idprodutocaracteristica, nomeproduto, descricao, idcomanda, iditemcomanda, lista = null;
 
         $('body').on('click', '.edtComanda', function (e) {
             e.preventDefault();
@@ -22,21 +22,34 @@
 
             $('#numeroMesa').text($(this).attr('mesa'));
 
-            $('#cadastrarPedido').hide();
+            $('#cadastrarPedido, #adicionarProduto').hide();
+
+            $('#verExtrato').attr('editar', 'true');
 
             $('#atualizarPedido').show().css('display', 'inline-block');
-
+            
             $.ajax({
                 type: "GET",
-                url: host + "getItemcomanda.php?idcomanda="+$(this).attr('id'),
+                url: host + "getItemcomanda.php?idcomanda=" + $(this).attr('id'),
                 dataType: "json",
+                async: false,
                 crossDomain: true,
                 cache: false,
                 success: function (result) {
                     lista = '';
 
                     $.each(result, function (i, field) {
-                        lista += "<li id=" + field.idproduto + "><a href=''>" + field.descricaoproduto + "</a><a href='#' data-icon='delete' id='rmv_" + field.idproduto + "' class='rmvProduto'></a></li>";
+                        lista += "<li id=" + field.idproduto + " nomeproduto='" + field.descricaoproduto + "' iditemcomanda='" + field.iditemcomanda + "' descricao='" + field.observacao + "' idproduto='" + field.idproduto + "' idprodutocaracteristica='" + field.idprodutocaracteristica + "'>";
+                        console.log('Editar dados: ' + i, field.idproduto, field.descricaoproduto, field.iditemcomanda, field.observacao, field.idproduto);
+                        lista += "<a href=''>";
+                        lista += "<h2>" + field.descricaoproduto + "</h2>";
+                        if (field.observacao != null || field.observacao != 'undefined'){
+                            console.log();
+                            lista += "<p>" + field.observacao + "</p>";
+                        }
+                        lista += "</a>";
+                        lista += "<a href='#' data-icon='delete' id='rmv_" + field.idproduto + "' class='rmvProduto'></a>";
+                        lista += "</li>";
                     });
 
                     $('#comandaListview').html(lista);
@@ -47,67 +60,38 @@
                 }
             });
             
+            if ($('#comandaListview li').length != 0) {
+                $('.badge').show().html($('#comandaListview li').length);
+            }
+
             $.mobile.changePage("#listaProdutos", { transition: "slideup", changeHash: false });
 
             $.mobile.changePage("#log", { transition: "slidedown", changeHash: false });
-
-            //$('#comandaListview').find('li').each(function () {
-            //    id = parseInt($(this).attr('id').replace("prod_", ""));
-
-            //    $.ajax({
-            //        type: "POST",
-            //        url: host + "insertItemComanda.php?idcomanda=" + $('#idComanda').text() + "&idproduto=" + id + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&numeromesa=" + $('#numeroMesa').text(),
-            //        success: function (result) {
-            //        },
-            //        error: function (e) {
-            //            console.log('Error: ' + e.message);
-            //        }
-            //    });
-
-            //    $.mobile.changePage("#paginaPrincipal", { transition: "slideup", changeHash: false });
-            //});
-
-
         });
-
+        
         $('body').on('click', '.adcProduto', function (e) {
             e.preventDefault();
+           
+            idproduto = $(this).attr('id'), nomeproduto = $(this).text();
 
-            var itemcomanda = null, idproduto = $(this).attr('id'), produto = $(this).text();
-
-            $('#comandaListview').hide();
-
-            $.ajax({
-                type: "GET",
-                url: host + "getUltimoItemComanda.php",
-                dataType: "json",
-                crossDomain: true,
-                cache: false,
-                success: function (result) {
-                    $.each(result, function (i, field) {
-                        itemcomanda = field.iditemcomanda;
-                    });
-                    
-                },
-                error: function () {
-
-                }
-            });
+            $('#comandaListview, #atualizarPedido, #cadastrarPedido').hide();
+            $("#any").show();
+            $('#adicionarProduto').css('display', 'inline-block')
             
             $.ajax({
                 type: "GET",
                 url: host + "getCaracteristicaProduto.php?idproduto=" + $(this).attr('id'),
                 dataType: "json",
                 crossDomain: true,
+                asyc: false,
                 cache: false,
                 success: function (result) {
-                    itemcomanda++;
                     lista = '';
-                    lista = "<div data-role='collapsible' data-collapsed='false' data-inset='false' id='teste' itemcomanda='" + itemcomanda + "' idproduto='"+idproduto+"'>";
-                    lista += "<h1>" + produto + "</h1>";
+                    lista = "<div data-role='collapsible' data-collapsed='false' data-inset='false' id='teste' iditemcomanda='" + iditemcomanda + "' idproduto='" + idproduto + "'>";
+                    lista += "<h1>" + nomeproduto + "</h1>";
                     $.each(result, function (i, field) {
                         //lista += "<li>";
-                        lista += "<div idprodutocaracteristica='"+field.id+"'>";
+                        lista += "<div idprodutocaracteristica='" + field.id + "'>";
                         lista += "<select id='select" + i + "' data-role='flipswitch' class='flipswitch'>";
                         lista += "<option value='com' selected>COM</option>";
                         lista += "<option value='sem'>SEM</option>";
@@ -121,7 +105,6 @@
                     lista += "<h1>Adicional</h1>";
                     lista += "</div>";
                     $("#any").html(lista).enhanceWithin();
-                    //$('#comandaListview').listview().listview('refresh');
 
                 },
                 error: function (e) {
@@ -130,35 +113,60 @@
             });
 
             $.mobile.changePage("#log", { transition: "slidedown", changeHash: false });
+        });
 
-            //var id = $(this).attr('id');
+        $("#verExtrato").on('click', function () {
+            if ($(this).attr('editar') == 'true') {
+                $('#comandaListview, #atualizarPedido').show();
+                $('#cadastrarPedido, #adicionarProduto, #any').hide();
 
-            //lista = "<li id=" + id + "><a href=''>" + $(this).text() + "</a><a href='#' data-icon='delete' id='rmv_" + id + "' class='rmvProduto'>Purchase album</a></li>";
+            }
+            else {
+                $('#comandaListview, #cadastrarPedido').show();
+                $("#any, #atualizarPedido, #adicionarProduto").hide();
+            }
 
-
-            //$('#comandaListview').append(lista);
-            //$('#comandaListview').listview().listview('refresh');
-
-            //if ($('#comandaListview li').length != 0){
-            //    $('.badge').show().html($('#comandaListview li').length);
-            //}
-
-            //$('#msg p').html('Item ' + $(this).text() + ' adicionado a comanda!');
-            //$("#msg").popup().popup("open");
-
-            //setTimeout(function () {
-            //    $("#msg").popup("close");
-            //}, 1000);
+            $.mobile.changePage("#log", { transition: "slidedown", changeHash: false });
         });
 
         $('#adicionarProduto').on('click', function (e) {
             e.preventDefault();
 
+            var descricao = '';
+
             $('#any').find('.ui-collapsible-content div').each(function (index) {
-                if ($('#select' + index + ' option:selected').text() == "SEM")
-                    console.log('ID Produto Caracteristica: ' + $("[idprodutocaracteristica]").attr('idprodutocaracteristica'), 'Descrição ' + $('#select' + index + ' option:selected').text() + ' ' + $('#ingrediente' + index).text().toUpperCase(), 'ID Comanda ' + $('#idComanda').text(), 'ID Produto: ' + $("[idproduto]").attr('idproduto') + ' Item Comanda: ' + $("[itemcomanda]").attr('itemcomanda'));
+                if ($('#select' + index + ' option:selected').text() == "SEM") {
+                    idprodutocaracteristica = $("#select" + index + " option:selected").closest('[idprodutocaracteristica]').attr('idprodutocaracteristica');
+                    descricao += $('#select' + index + ' option:selected').text() + ' ' + $('#ingrediente' + index).text().toUpperCase() + ' ';
+                }
             });
-            
+
+            idcomanda = $('#idComanda').text();
+            lista = "<li id=" + idproduto + " nomeproduto='" + nomeproduto + "' idprodutocaracteristica='" + idprodutocaracteristica + "' descricao='" + descricao + "' idcomanda='" + idcomanda + "' idproduto='" + idproduto + "' iditemcomanda='" + iditemcomanda + "'>";
+            lista += "<a href=''>";
+            lista += "<h2>" + nomeproduto + "</h2>";
+            lista += "<p>" + descricao + "</p>";
+            lista += "</a>";
+            lista += "<a href='#' data-icon='delete' id='rmv_" + idproduto + "' class='rmvProduto'></a>";
+            lista += "</li>";
+
+
+            $('#comandaListview').append(lista);
+            $('#comandaListview').listview().listview('refresh');
+
+            if ($('#comandaListview li').length != 0) {
+                $('.badge').show().html($('#comandaListview li').length);
+            }
+
+            $.mobile.changePage('#listaProdutos', { 'role': 'page' });
+
+            $('#msg p').html('Item ' + nomeproduto + ' adicionado a comanda!');
+            $("#msg").popup().popup("open");
+
+            setTimeout(function () {
+                $("#msg").popup("close");
+            }, 2000);
+
         });
 
         $('body').on('click', '.rmvProduto', function (e) {
@@ -170,7 +178,7 @@
                 mode: 'button',
                 headerText: 'Confirmação',
                 headerClose: true,
-                buttonPrompt: 'Deseja excluir o item ' +  $(this).prev().text() + ' da comanda?',
+                buttonPrompt: 'Deseja excluir o item ' + $(this).parent().attr('nomeproduto') + ' da comanda?',
                 buttons: {
                     'Sim': {
                         click: function () {
@@ -181,7 +189,6 @@
                                 $('.badge').show().html($('#comandaListview li').length);
                             } else {
                                 $('.badge').hide();
-                                $.mobile.sdCurrentDialog.close();
                             }
                         },
                         icon: "delete",
@@ -197,6 +204,7 @@
 
         $('#criarPedido').on('click', function () {
             $('#atualizarPedido').hide();
+            $('#verExtrato').attr('editar', 'false');
 
             if ($('#number').val() == '') {
                 $('<div>').simpledialog2({
@@ -212,7 +220,6 @@
                     },
                 });
             } else {
-                //if (!$('#number').val().match(/^\d+$/)) { console.log('Não é um número!'); } else { console.log('É um número!'); }
                 if ($('#number').val() <= 0 || $('#number').val() > 12) {
 
                     $('<div>').simpledialog2({
@@ -236,6 +243,7 @@
                         dataType: "json",
                         crossDomain: true,
                         cache: false,
+                        async: false,
                         success: function (result) {
                             $('#numeroMesa').text($("#number").val());
                             $('#idComanda').text(result[0].idcomanda + 1);
@@ -253,9 +261,7 @@
                                     }
                                 }
                             });
-
-                            console.log('Criou e limpou!');
-
+                            
                             $('#cadastrarPedido').show().css('display', 'inline-block');
 
                             $('#comandaListview').html('');
@@ -273,7 +279,7 @@
 
         });
 
-        $('#cadastrarPedido').on('click', function (e) {
+        $('body').on('click', '#cadastrarPedido', function (e) {
             var id = null;
 
             e.preventDefault();
@@ -282,20 +288,8 @@
                 $.ajax({
                     type: "POST",
                     url: host + "insertComanda.php",
+                    async: false,
                     success: function (result) {
-                        //$.mobile.changePage("#listaProdutos", { transition: "slideup", changeHash: false });
-                        //$('<div>').simpledialog2({
-                        //    mode: 'button',
-                        //    headerText: 'Ateñção',
-                        //    headerClose: true,
-                        //    buttonPrompt: 'Comanda cadastrada com sucesso!',
-                        //    buttons: {
-                        //        'OK': {
-                        //            click: function () {
-                        //            },
-                        //        }
-                        //    }
-                        //})
                         listaComandas();
                     },
                     error: function (e) {
@@ -303,12 +297,18 @@
                     }
                 });
 
-                $('#comandaListview').find('li').each(function () {
-                    id = parseInt($(this).attr('id').replace("prod_", ""));
+                $('#comandaListview').find('li').each(function (index) {
+                    descricao = '';
+                    idprodutocaracteristica = $(this).attr('idprodutocaracteristica');
+                    idproduto = $(this).attr('idproduto');
+                    descricao = $(this).attr('descricao');
+                    iditemcomanda = $(this).attr('iditemcomanda');
+                    console.log('Cadastrar pedido: ' + index, idproduto, descricao, iditemcomanda);
 
                     $.ajax({
                         type: "POST",
-                        url: host + "insertItemComanda.php?idcomanda=" + $('#idComanda').text() + "&idproduto=" + id + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&numeromesa=" + $('#numeroMesa').text(),
+                        url: host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&observacao=" + descricao + "&numeromesa=" + $('#numeroMesa').text(),
+                        async: false,
                         success: function (result) {
                         },
                         error: function (e) {
@@ -342,6 +342,8 @@
                 $('#comandaListview').find('li').each(function () {
                     $(this).remove();
                 });
+
+                listaComandas();
             } else {
                 $('<div>').simpledialog2({
                     mode: 'button',
@@ -370,7 +372,8 @@
             if ($('#comandaListview li').length != 0) {
                 $.ajax({
                     type: "POST",
-                    url: host + "deleteItemComanda.php?idcomanda="+$('#idComanda').text(),
+                    asyc: false,
+                    url: host + "deleteItemComanda.php?idcomanda=" + $('#idComanda').text(),
                     success: function (result) {
                     },
                     error: function (e) {
@@ -378,45 +381,46 @@
                     }
                 });
 
-                $('#comandaListview').find('li').each(function () {
-                    id = parseInt($(this).attr('id').replace("prod_", ""));
-
+                $('#comandaListview').find('li').each(function (index) {
+                    idprodutocaracteristica = $(this).attr('idprodutocaracteristica');
+                    idproduto = $(this).attr('idproduto');
+                    descricao = $(this).attr('descricao');
+                    
+                    console.log('Atualizar pedido: ' + index, iditemcomanda, idcomanda, idproduto, idprodutocaracteristica, $(this).attr('descricao'), 'atualizar pedido')
+                    
                     $.ajax({
                         type: "POST",
-                        url: host + "insertItemComanda.php?idcomanda=" + $('#idComanda').text() + "&idproduto=" + id + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&numeromesa=" + $('#numeroMesa').text(),
+                        asyc: false,
+                        url: host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') +  "&observacao=" + descricao + "&numeromesa=" + $('#numeroMesa').text(),
                         success: function (result) {
                         },
                         error: function (e) {
                             console.log('Error: ' + e.message);
                         }
                     });
-
-                    $.mobile.changePage("#paginaPrincipal", { transition: "slideup", changeHash: false });
-                    $('<div>').simpledialog2({
-                        mode: 'button',
-                        headerText: 'Sucesso',
-                        headerClose: true,
-                        buttonPrompt: 'Pedido cadastrado com sucesso!',
-                        buttons: {
-                            'OK': {
-                                click: function () {
-                                },
-                            }
-                        }
-                    });
-
-                    $('#comandaListview').html('', function () {
-                        console.log('Limpou');
-                    });
-
-                    $('.badge').hide().html('');
-
-                    setTimeout(function () {
-                        $(document).trigger('simpledialog', { 'method': 'close' });
-                    }, 2000);
-
-                    
                 });
+
+                $.mobile.changePage("#paginaPrincipal", { transition: "slideup", changeHash: false });
+                $('<div>').simpledialog2({
+                    mode: 'button',
+                    headerText: 'Sucesso',
+                    headerClose: true,
+                    buttonPrompt: 'Pedido cadastrado com sucesso!',
+                    buttons: {
+                        'OK': {
+                            click: function () {
+                            },
+                        }
+                    }
+                });
+
+                $('#comandaListview').html('');
+
+                $('.badge').hide().html('');
+
+                setTimeout(function () {
+                    $(document).trigger('simpledialog', { 'method': 'close' });
+                }, 2000);
             } else {
                 $('<div>').simpledialog2({
                     mode: 'button',
@@ -436,24 +440,25 @@
                 $.mobile.sdCurrentDialog.close();
             }, 2000);
         });
-        
-        function listaComandas(){
+
+        function listaComandas() {
             $("#listaComandas").html('');
-            
+
             $.ajax({
                 type: "GET",
                 url: host + "getComandas.php",
                 dataType: "json",
                 crossDomain: true,
                 cache: false,
+                asyc: false,
                 success: function (result) {
                     if (result == "") {
                         var div = '<p>Nenhum registro encontrado</p>';
                         $('#comandasAbertas .ui-content').append(div);
                     } else {
-                        var div;
+                        var div = '';
                         $.each(result, function (i, field) {
-                            div = "<li id=" + field.idcomanda +" class='edtComanda' mesa="+ field.numeromesa +">";
+                            div += "<li id=" + field.idcomanda + " class='edtComanda' mesa=" + field.numeromesa + ">";
                             div += "<a href='#'>";
                             div += "<img src='images/iconePedido.png' />";
                             div += "<h2>Comanda: " + field.idcomanda + "</h2>";
@@ -463,8 +468,8 @@
                             div += "</p>";
                             div += "</a>";
                             div += "</li>";
-                            $("#listaComandas").append(div);
                         });
+                        $("#listaComandas").html(div);
                         $('#listaComandas').listview().listview('refresh');
                     }
                 },
@@ -479,6 +484,7 @@
                 type: "GET",
                 url: host + "getProdutoSetor.php",
                 dataType: "json",
+                async: false,
                 crossDomain: true,
                 cache: false,
                 success: function (result) {
@@ -498,9 +504,9 @@
                                 categoria = result[i].nome;
                                 collapse += "<div data-role='collapsible' data-iconpos='right' data-theme='b'>";
                                 collapse += "<h3>" + categoria + "</h3>";
-                                collapse += "<ul data-role='listview' data-filter='true' data-sort='true' data-filter-placeholder='Pesquisa'>";
+                                collapse += "<ul data-role='listview' data-filter='true' data-sort='true' data-filter-placeholder='Pesquisa' class='produtos' id='" + i + "'>";
                             }
-                            collapse += "<li data-icon='plus'><a href='#' id='" + result[i].idproduto + "' class='adcProduto'>" + result[i].descricaoproduto + "</a></li>";
+                            collapse += "<li data-icon='plus'><a href='#' id='" + result[i].idproduto + "' class='adcProduto' idsetor='" + result[i].idsetor + "'>" + result[i].descricaoproduto + "</a></li>";
                         }
                         $('#contentProdutos').append(collapse);
                     }
@@ -514,8 +520,6 @@
         listaComandas();
 
         listaProdutoSetor();
-
-
     };
 
     function onPause() {
@@ -525,4 +529,4 @@
     function onResume() {
         // TODO: This application has been reactivated. Restore application state here.
     };
-} )();
+})();
