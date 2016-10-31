@@ -148,3 +148,8 @@ h1 {
 .ui-header .ui-title, .ui-footer .ui-title{
     margin:0 10% !important;
 }
+
+.ui-listview>li p{
+    overflow: auto!important;
+    white-space: normal!important;
+}

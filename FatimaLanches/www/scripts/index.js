@@ -8,12 +8,12 @@
     document.addEventListener('deviceready', onDeviceReady.bind(this), false);
 
     var host;
-    //host = "https://stormy-ravine-22148.herokuapp.com/";
-    host = "http://localhost:7541/minhaapi/";
+    host = "https://stormy-ravine-22148.herokuapp.com/";
+    //host = "http://localhost:7541/minhaapi/";
 
     function onDeviceReady() {
 
-        var idproduto, idprodutocaracteristica, nomeproduto, descricao, idcomanda, iditemcomanda, lista = null;
+        var idproduto, idprodutocaracteristica, nomeproduto, descricao, idcomanda, iditemcomanda, lista, idsetor = null;
 
         $('body').on('click', '.edtComanda', function (e) {
             e.preventDefault();
@@ -30,7 +30,7 @@
             
             $.ajax({
                 type: "GET",
-                url: host + "getItemcomanda.php?idcomanda=" + $(this).attr('id'),
+                url: host + "getItemComanda.php?idcomanda=" + $(this).attr('id'),
                 dataType: "json",
                 async: false,
                 crossDomain: true,
@@ -40,11 +40,9 @@
 
                     $.each(result, function (i, field) {
                         lista += "<li id=" + field.idproduto + " nomeproduto='" + field.descricaoproduto + "' iditemcomanda='" + field.iditemcomanda + "' descricao='" + field.observacao + "' idproduto='" + field.idproduto + "' idprodutocaracteristica='" + field.idprodutocaracteristica + "'>";
-                        console.log('Editar dados: ' + i, field.idproduto, field.descricaoproduto, field.iditemcomanda, field.observacao, field.idproduto);
                         lista += "<a href=''>";
                         lista += "<h2>" + field.descricaoproduto + "</h2>";
                         if (field.observacao != null || field.observacao != 'undefined'){
-                            console.log();
                             lista += "<p>" + field.observacao + "</p>";
                         }
                         lista += "</a>";
@@ -72,7 +70,7 @@
         $('body').on('click', '.adcProduto', function (e) {
             e.preventDefault();
            
-            idproduto = $(this).attr('id'), nomeproduto = $(this).text();
+            idproduto = $(this).attr('id'), nomeproduto = $(this).text(), idsetor = $(this).attr('idsetor');
 
             $('#comandaListview, #atualizarPedido, #cadastrarPedido').hide();
             $("#any").show();
@@ -87,29 +85,45 @@
                 cache: false,
                 success: function (result) {
                     lista = '';
-                    lista = "<div data-role='collapsible' data-collapsed='false' data-inset='false' id='teste' iditemcomanda='" + iditemcomanda + "' idproduto='" + idproduto + "'>";
+                    lista = "<div data-role='collapsible' data-collapsed='false' data-inset='false' id='divPadrao' iditemcomanda='" + iditemcomanda + "' idproduto='" + idproduto + "'>";
                     lista += "<h1>" + nomeproduto + "</h1>";
                     $.each(result, function (i, field) {
-                        //lista += "<li>";
-                        lista += "<div idprodutocaracteristica='" + field.id + "'>";
+                        lista += "<div>";
                         lista += "<select id='select" + i + "' data-role='flipswitch' class='flipswitch'>";
                         lista += "<option value='com' selected>COM</option>";
                         lista += "<option value='sem'>SEM</option>";
                         lista += "</select>";
                         lista += "<span id='ingrediente" + i + "'>" + field.descricaocaracteristica + "</span>";
                         lista += "</div>";
-                        //lista += "</li>";
                     });
                     lista += "</div>";
-                    lista += "<div data-role='collapsible' data-inset='false'>";
+                    lista += "<div data-role='collapsible' data-inset='false' id='divAdicional'>";
                     lista += "<h1>Adicional</h1>";
-                    lista += "</div>";
-                    $("#any").html(lista).enhanceWithin();
-
                 },
                 error: function (e) {
                     console.log('Error: ' + e.message);
                 }
+            }).done(function () {
+                $.ajax({
+                    type: "GET",
+                    url: host + "getAdicional.php?idsetor=" + idsetor,
+                    success: function (result) {
+                        $.each(JSON.parse(result), function (i, field) {
+                            lista += "<div>";
+                            lista += "<select id='adicional" + i + "' data-role='flipswitch' class='flipswitch adicional'>";
+                            lista += "<option value='com'>COM</option>";
+                            lista += "<option value='sem' selected>SEM</option>";
+                            lista += "</select>";
+                            lista += "<span id='ingredienteAdicional" + i + "'>" + field.descricaoproduto + "</span>";
+                            lista += "</div>";
+                        });
+                        lista += "</div>";
+                        $("#any").html(lista).enhanceWithin();
+                    },
+                    error: function (e) {
+                        console.log('Error: ' + e.message);
+                    }
+                });
             });
 
             $.mobile.changePage("#log", { transition: "slidedown", changeHash: false });
@@ -123,6 +137,7 @@
             }
             else {
                 $('#comandaListview, #cadastrarPedido').show();
+                $('#cadastrarPedido').css('display', 'inline-block');
                 $("#any, #atualizarPedido, #adicionarProduto").hide();
             }
 
@@ -134,15 +149,18 @@
 
             var descricao = '';
 
-            $('#any').find('.ui-collapsible-content div').each(function (index) {
-                if ($('#select' + index + ' option:selected').text() == "SEM") {
-                    idprodutocaracteristica = $("#select" + index + " option:selected").closest('[idprodutocaracteristica]').attr('idprodutocaracteristica');
-                    descricao += $('#select' + index + ' option:selected').text() + ' ' + $('#ingrediente' + index).text().toUpperCase() + ' ';
-                }
+            $('#any').find('#divPadrao div').each(function (index) {
+                if ($('#select' + index + ' option:selected').text() == "SEM")
+                    descricao += 'SEM ' + $('#ingrediente' + index).text().toUpperCase() + ' ';
+            });
+
+            $('#any').find('#divAdicional div').each(function (index) {
+                if ($('#adicional' + index + ' option:selected').text() == "COM")
+                    descricao += $('#ingredienteAdicional' + index).text().toUpperCase() + ' ';
             });
 
             idcomanda = $('#idComanda').text();
-            lista = "<li id=" + idproduto + " nomeproduto='" + nomeproduto + "' idprodutocaracteristica='" + idprodutocaracteristica + "' descricao='" + descricao + "' idcomanda='" + idcomanda + "' idproduto='" + idproduto + "' iditemcomanda='" + iditemcomanda + "'>";
+            lista = "<li id=" + idproduto + " nomeproduto='" + nomeproduto + "'descricao='" + descricao + "' idcomanda='" + idcomanda + "' idproduto='" + idproduto + "' iditemcomanda='" + iditemcomanda + "'>";
             lista += "<a href=''>";
             lista += "<h2>" + nomeproduto + "</h2>";
             lista += "<p>" + descricao + "</p>";
@@ -303,7 +321,6 @@
                     idproduto = $(this).attr('idproduto');
                     descricao = $(this).attr('descricao');
                     iditemcomanda = $(this).attr('iditemcomanda');
-                    console.log('Cadastrar pedido: ' + index, idproduto, descricao, iditemcomanda);
 
                     $.ajax({
                         type: "POST",
@@ -385,9 +402,7 @@
                     idprodutocaracteristica = $(this).attr('idprodutocaracteristica');
                     idproduto = $(this).attr('idproduto');
                     descricao = $(this).attr('descricao');
-                    
-                    console.log('Atualizar pedido: ' + index, iditemcomanda, idcomanda, idproduto, idprodutocaracteristica, $(this).attr('descricao'), 'atualizar pedido')
-                    
+                                        
                     $.ajax({
                         type: "POST",
                         asyc: false,
