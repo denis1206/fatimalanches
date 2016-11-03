@@ -8,8 +8,8 @@
     document.addEventListener('deviceready', onDeviceReady.bind(this), false);
 
     var host;
-    host = "https://stormy-ravine-22148.herokuapp.com/";
-    //host = "http://localhost:7541/minhaapi/";
+    //host = "https://stormy-ravine-22148.herokuapp.com/";
+    host = "http://192.168.35.37:7541/minhaapi/";
 
     function onDeviceReady() {
 
