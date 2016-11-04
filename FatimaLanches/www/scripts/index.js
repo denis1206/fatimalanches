@@ -9,11 +9,11 @@
 
     var host;
     //host = "https://stormy-ravine-22148.herokuapp.com/";
-    host = "http://192.168.35.37:7541/minhaapi/";
+    host = "http://localhost:7541/minhaapi/";
 
     function onDeviceReady() {
 
-        var idproduto, idprodutocaracteristica, nomeproduto, descricao, idcomanda, iditemcomanda, lista, idsetor = null;
+        var idproduto, idprodutocaracteristica, nomeproduto, descricao, idcomanda, iditemcomanda, lista, precoproduto, idsetor = null;
 
         $('body').on('click', '.edtComanda', function (e) {
             e.preventDefault();
@@ -70,7 +70,7 @@
         $('body').on('click', '.adcProduto', function (e) {
             e.preventDefault();
            
-            idproduto = $(this).attr('id'), nomeproduto = $(this).text(), idsetor = $(this).attr('idsetor');
+            idproduto = $(this).attr('id'), nomeproduto = $(this).text(), idsetor = $(this).attr('idsetor'), precoproduto = parseFloat($(this).attr('valorproduto'));
 
             $('#comandaListview, #atualizarPedido, #cadastrarPedido').hide();
             $("#any").show();
@@ -85,7 +85,7 @@
                 cache: false,
                 success: function (result) {
                     lista = '';
-                    lista = "<div data-role='collapsible' data-collapsed='false' data-inset='false' id='divPadrao' iditemcomanda='" + iditemcomanda + "' idproduto='" + idproduto + "'>";
+                    lista = "<div data-role='collapsible' data-collapsed='false' data-inset='false' id='divPadrao' idproduto='" + idproduto + "'>";
                     lista += "<h1>" + nomeproduto + "</h1>";
                     $.each(result, function (i, field) {
                         lista += "<div>";
@@ -114,7 +114,7 @@
                             lista += "<option value='com'>COM</option>";
                             lista += "<option value='sem' selected>SEM</option>";
                             lista += "</select>";
-                            lista += "<span id='ingredienteAdicional" + i + "'>" + field.descricaoproduto + "</span>";
+                            lista += "<span id='ingredienteAdicional" + i + "' valoradicional='" + field.valorvenda1 + "'>" + field.descricaoproduto + "</span>";
                             lista += "</div>";
                         });
                         lista += "</div>";
@@ -147,7 +147,9 @@
         $('#adicionarProduto').on('click', function (e) {
             e.preventDefault();
 
-            var descricao = '';
+            var totaladicional, precoadicional, descricao = '';
+            totaladicional = 0;
+            parseFloat(totaladicional);
 
             $('#any').find('#divPadrao div').each(function (index) {
                 if ($('#select' + index + ' option:selected').text() == "SEM")
@@ -155,15 +157,22 @@
             });
 
             $('#any').find('#divAdicional div').each(function (index) {
-                if ($('#adicional' + index + ' option:selected').text() == "COM")
+                if ($('#adicional' + index + ' option:selected').text() == "COM"){
                     descricao += $('#ingredienteAdicional' + index).text().toUpperCase() + ' ';
+                    precoadicional = parseFloat($('#ingredienteAdicional' + index).attr('valoradicional'));
+                    totaladicional += precoadicional;
+                    console.log(totaladicional);
+                }
             });
+            
+            totaladicional += precoproduto;
 
             idcomanda = $('#idComanda').text();
-            lista = "<li id=" + idproduto + " nomeproduto='" + nomeproduto + "'descricao='" + descricao + "' idcomanda='" + idcomanda + "' idproduto='" + idproduto + "' iditemcomanda='" + iditemcomanda + "'>";
+            lista = "<li id=" + idproduto + " nomeproduto='" + nomeproduto + "'descricao='" + descricao + "' idcomanda='" + idcomanda + "' idproduto='" + idproduto + "' iditemcomanda='" + iditemcomanda + "'precoitem = '" + totaladicional + "'>";
             lista += "<a href=''>";
             lista += "<h2>" + nomeproduto + "</h2>";
             lista += "<p>" + descricao + "</p>";
+            lista += "<p class='precoItem'>R$ " + totaladicional + "</p>";
             lista += "</a>";
             lista += "<a href='#' data-icon='delete' id='rmv_" + idproduto + "' class='rmvProduto'></a>";
             lista += "</li>";
@@ -521,7 +530,7 @@
                                 collapse += "<h3>" + categoria + "</h3>";
                                 collapse += "<ul data-role='listview' data-filter='true' data-sort='true' data-filter-placeholder='Pesquisa' class='produtos' id='" + i + "'>";
                             }
-                            collapse += "<li data-icon='plus'><a href='#' id='" + result[i].idproduto + "' class='adcProduto' idsetor='" + result[i].idsetor + "'>" + result[i].descricaoproduto + "</a></li>";
+                            collapse += "<li data-icon='plus'><a href='#' id='" + result[i].idproduto + "' class='adcProduto' idsetor='" + result[i].idsetor + "' valorproduto='"+result[i].valorvenda1+"'>" + result[i].descricaoproduto + "</a></li>";
                         }
                         $('#contentProdutos').append(collapse);
                     }

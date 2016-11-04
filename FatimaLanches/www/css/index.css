@@ -153,3 +153,19 @@ h1 {
     overflow: auto!important;
     white-space: normal!important;
 }
+
+.precoItem{
+    font-size: 16px !important;
+    text-align: right;
+}
+
+.ui-flipswitch,
+.ui-flipswitch-off{
+    background: green !important;
+    color: #fff !important;
+    text-shadow: none !important;
+}
+
+.ui-page-theme-a .ui-flipswitch-active{
+    background-color: red !important;
+}
