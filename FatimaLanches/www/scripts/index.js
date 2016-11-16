@@ -13,7 +13,7 @@
 
     function onDeviceReady() {
 
-        var idproduto, idprodutocaracteristica, nomeproduto, descricao, idcomanda, iditemcomanda, lista, precoproduto, idsetor = null;
+        var idproduto, idprodutocaracteristica, nomeproduto, descricao, idcomanda, iditemcomanda, lista, precoproduto, idsetor = null, valortotal = 0;
 
         $('body').on('click', '.edtComanda', function (e) {
             e.preventDefault();
@@ -26,7 +26,11 @@
 
             $('#verExtrato').attr('editar', 'true');
 
+            $('#valorcomanda, #confirmarEntrega').show();
+
             $('#atualizarPedido').show().css('display', 'inline-block');
+
+            var valor = 0;
             
             $.ajax({
                 type: "GET",
@@ -39,16 +43,20 @@
                     lista = '';
 
                     $.each(result, function (i, field) {
-                        lista += "<li id=" + field.idproduto + " nomeproduto='" + field.descricaoproduto + "' iditemcomanda='" + field.iditemcomanda + "' descricao='" + field.observacao + "' idproduto='" + field.idproduto + "' idprodutocaracteristica='" + field.idprodutocaracteristica + "'>";
+                        lista += "<li id=" + field.idproduto + " nomeproduto='" + field.descricaoproduto + "' iditemcomanda='" + field.iditemcomanda + "' descricao='" + field.observacao + "' idproduto='" + field.idproduto + "' idprodutocaracteristica='" + field.idprodutocaracteristica + "' precoitem='" + field.valortotalitem + "'>";
                         lista += "<a href=''>";
                         lista += "<h2>" + field.descricaoproduto + "</h2>";
                         if (field.observacao != null || field.observacao != 'undefined'){
                             lista += "<p>" + field.observacao + "</p>";
                         }
+                        lista += "<p class='precoItem'>R$: " + field.valortotalitem.slice(0,5) + "</p>";
                         lista += "</a>";
                         lista += "<a href='#' data-icon='delete' id='rmv_" + field.idproduto + "' class='rmvProduto'></a>";
                         lista += "</li>";
+                        valor += parseFloat(field.valortotalitem.slice(0,5));
                     });
+
+                    $('#valortotal').text(valor);
 
                     $('#comandaListview').html(lista);
                     $('#comandaListview').listview().listview('refresh');
@@ -72,7 +80,7 @@
            
             idproduto = $(this).attr('id'), nomeproduto = $(this).text(), idsetor = $(this).attr('idsetor'), precoproduto = parseFloat($(this).attr('valorproduto'));
 
-            $('#comandaListview, #atualizarPedido, #cadastrarPedido').hide();
+            $('#comandaListview, #atualizarPedido, #cadastrarPedido, #valorcomanda, #confirmarEntrega').hide();
             $("#any").show();
             $('#adicionarProduto').css('display', 'inline-block')
             
@@ -129,17 +137,33 @@
             $.mobile.changePage("#log", { transition: "slidedown", changeHash: false });
         });
 
+        $("#confirmarEntrega").on('click', function () {
+            $.ajax({
+                type: "POST",
+                url: host + "confirmaEntrega.php?idcomanda=" + $('#idComanda').text() + "&horaconfirmacao=" + moment().format('HH:mm:ss'),
+                async: false,
+                success: function (result) {
+                    relatorioTempo();
+                },
+                error: function (e) {
+                    console.log('Error: ' + e.message);
+                }
+            });
+        });
+
         $("#verExtrato").on('click', function () {
             if ($(this).attr('editar') == 'true') {
-                $('#comandaListview, #atualizarPedido').show();
+                $('#comandaListview, #atualizarPedido, #confirmarEntrega').show();
                 $('#cadastrarPedido, #adicionarProduto, #any').hide();
 
             }
             else {
                 $('#comandaListview, #cadastrarPedido').show();
                 $('#cadastrarPedido').css('display', 'inline-block');
-                $("#any, #atualizarPedido, #adicionarProduto").hide();
+                $("#any, #atualizarPedido, #adicionarProduto, #confirmarEntrega").hide();
             }
+
+            $('#valorcomanda').show();
 
             $.mobile.changePage("#log", { transition: "slidedown", changeHash: false });
         });
@@ -148,7 +172,7 @@
             e.preventDefault();
 
             var totaladicional, precoadicional, descricao = '';
-            totaladicional = 0;
+            totaladicional = 0, parseFloat(valortotal);
             parseFloat(totaladicional);
 
             $('#any').find('#divPadrao div').each(function (index) {
@@ -161,9 +185,13 @@
                     descricao += $('#ingredienteAdicional' + index).text().toUpperCase() + ' ';
                     precoadicional = parseFloat($('#ingredienteAdicional' + index).attr('valoradicional'));
                     totaladicional += precoadicional;
-                    console.log(totaladicional);
                 }
             });
+
+            if ($('#comandaListview li').length != 0) {
+                console.log('Tem prdouto na lista', $('#valortotal').text(), precoproduto);
+                $('.badge').show().html($('#comandaListview li').length);
+            }
             
             totaladicional += precoproduto;
 
@@ -181,9 +209,12 @@
             $('#comandaListview').append(lista);
             $('#comandaListview').listview().listview('refresh');
 
-            if ($('#comandaListview li').length != 0) {
-                $('.badge').show().html($('#comandaListview li').length);
-            }
+            $('#confirmarEntrega').hide();
+
+            console.log(valortotal, parseFloat(totaladicional));
+
+            valortotal = valortotal + parseFloat(totaladicional);
+            $('#valortotal').text(valortotal);
 
             $.mobile.changePage('#listaProdutos', { 'role': 'page' });
 
@@ -212,9 +243,18 @@
                             $('#' + id).parent().remove();
                             $('#comandaListview').listview().listview('refresh');
 
+                            valortotal = 0;
+
+                            $('#comandaListview').find('li').each(function (index) {
+                                valortotal += parseFloat($(this).attr('precoitem'));
+                                $('#valortotal').text(valortotal)
+                            });
+
+
                             if ($('#comandaListview li').length != 0) {
                                 $('.badge').show().html($('#comandaListview li').length);
                             } else {
+                                $('#valortotal').text('');
                                 $('.badge').hide();
                             }
                         },
@@ -230,7 +270,7 @@
         });
 
         $('#criarPedido').on('click', function () {
-            $('#atualizarPedido').hide();
+            $('#atualizarPedido, #confirmarEntrega').hide();
             $('#verExtrato').attr('editar', 'false');
 
             if ($('#number').val() == '') {
@@ -288,6 +328,8 @@
                                     }
                                 }
                             });
+
+                            $('#valortotal').text('');
                             
                             $('#cadastrarPedido').show().css('display', 'inline-block');
 
@@ -314,7 +356,7 @@
             if ($('#comandaListview li').length != 0) {
                 $.ajax({
                     type: "POST",
-                    url: host + "insertComanda.php",
+                    url: host + "insertComanda.php?preco="+parseFloat($('#valortotal').text()),
                     async: false,
                     success: function (result) {
                         listaComandas();
@@ -330,10 +372,13 @@
                     idproduto = $(this).attr('idproduto');
                     descricao = $(this).attr('descricao');
                     iditemcomanda = $(this).attr('iditemcomanda');
+                    precoproduto = $(this).attr('precoitem');
+
+                    console.log(encodeURI(host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&observacao=" + descricao + "&numeromesa=" + $('#numeroMesa').text() + "&precoitem=" + precoproduto));
 
                     $.ajax({
                         type: "POST",
-                        url: host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&observacao=" + descricao + "&numeromesa=" + $('#numeroMesa').text(),
+                        url: encodeURI(host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&observacao=" + descricao + "&numeromesa=" + $('#numeroMesa').text() + "&precoitem=" + precoproduto),
                         async: false,
                         success: function (result) {
                         },
@@ -352,7 +397,7 @@
                     mode: 'button',
                     headerText: 'Sucesso',
                     headerClose: true,
-                    buttonPrompt: 'Pedido cadastrado com sucesso!',
+                    buttonPrompt: 'Pedido cadastrado com sucesso! <br/> Valor Total: R$ ' + $('#valortotal').text(),
                     buttons: {
                         'OK': {
                             click: function () {
@@ -360,6 +405,8 @@
                         }
                     }
                 });
+
+                $('#valortotal').text('');
 
                 setTimeout(function () {
                     $.mobile.sdCurrentDialog.close();
@@ -408,15 +455,21 @@
                 });
 
                 $('#comandaListview').find('li').each(function (index) {
+                    idcomanda = $('#idComanda').text();
                     idprodutocaracteristica = $(this).attr('idprodutocaracteristica');
                     idproduto = $(this).attr('idproduto');
                     descricao = $(this).attr('descricao');
+                    precoproduto = $(this).attr('precoitem');
+
+                    console.log(idproduto, descricao, precoproduto, idcomanda);
+                    console.log(encodeURI(host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&observacao=" + descricao + "&numeromesa=" + $('#numeroMesa').text() + "&precoitem=" + precoproduto));
                                         
                     $.ajax({
                         type: "POST",
                         asyc: false,
-                        url: host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') +  "&observacao=" + descricao + "&numeromesa=" + $('#numeroMesa').text(),
+                        url: encodeURI(host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&observacao=" + descricao + "&numeromesa=" + $('#numeroMesa').text() + "&precoitem=" + precoproduto),
                         success: function (result) {
+                            console.log('inseriu!');
                         },
                         error: function (e) {
                             console.log('Error: ' + e.message);
@@ -424,12 +477,24 @@
                     });
                 });
 
+                $.ajax({
+                    type: "POST",
+                    asyc: false,
+                    url: host + "edtComanda.php?idcomanda=" + $('#idComanda').text() + "&preco=" + $('#valortotal').text(),
+                    success: function (result) {
+                        console.log($('#valortotal').text());
+                    },
+                    error: function (e) {
+                        console.log('Error: ' + e.message);
+                    }
+                });
+
                 $.mobile.changePage("#paginaPrincipal", { transition: "slideup", changeHash: false });
                 $('<div>').simpledialog2({
                     mode: 'button',
                     headerText: 'Sucesso',
                     headerClose: true,
-                    buttonPrompt: 'Pedido cadastrado com sucesso!',
+                    buttonPrompt: 'Pedido ' + $('#idComanda').text() + ' atualizado com sucesso! <br/> Valor Total: R$ ' + $('#valortotal').text(),
                     buttons: {
                         'OK': {
                             click: function () {
@@ -437,6 +502,8 @@
                         }
                     }
                 });
+
+                listaComandas();
 
                 $('#comandaListview').html('');
 
@@ -486,9 +553,13 @@
                             div += "<a href='#'>";
                             div += "<img src='images/iconePedido.png' />";
                             div += "<h2>Comanda: " + field.idcomanda + "</h2>";
-                            div += "<p>Mesa: " + field.numeromesa + "</p>";
-                            div += "<p>Status: ";
+                            div += "<p><b>Mesa:</b> " + field.numeromesa;
+                            div += " - <b>Status:</b> ";
                             (field.status) ? div += "Aberta" : div += "Fechada";
+                            div += "</p>";
+                            div += "<p><b>VALOR TOTAL: R$</b> ";
+                            if (field.valorconsumacaoatual)
+                                div += field.valorconsumacaoatual.slice(0,5);
                             div += "</p>";
                             div += "</a>";
                             div += "</li>";
@@ -540,6 +611,85 @@
                 }
             });
         }
+
+        function relatorioTempo() {
+            $("#listaTempo").html('');
+
+            $.ajax({
+                type: "GET",
+                url: host + "getRelatorioTempo.php",
+                dataType: "json",
+                crossDomain: true,
+                cache: false,
+                asyc: false,
+                success: function (result) {
+                    if (result == "") {
+                        var div = '<p>Nenhum registro encontrado</p>';
+                        $('#listaTempo .ui-content').append(div);
+                    } else {
+                        var div = '';
+                        $.each(result, function (i, field) {
+                            div += "<li>";
+                            div += "<a href='#'>";
+                            div += "<h2>Comanda: " + field.idcomanda + "</h2>";
+                            div += "<p><b>Pedido entregue em:</b> " + field.horas + "h:" + field.minutos + "min";
+                            div += "</p>";
+                            div += "</a>";
+                            div += "</li>";
+                        });
+                        $("#listaTempo").html(div);
+                        $('#listaTempo').listview().listview('refresh');
+                    }
+                },
+                error: function (e) {
+                    console.log('Error: ' + e.message);
+                }
+            });
+        };
+
+        function relatorioTop10() {
+            var resultado = [];
+
+            $.ajax({
+                type: "GET",
+                url: "http://localhost:7541/minhaapi/getVendasProdutos.php",
+                dataType: "json",
+                crossDomain: true,
+                asyc: false,
+                cache: false,
+                success: function (result) {
+                    $.each(result, function (key, value) {
+                        resultado.push({ label: value[0], y: parseInt(value[1]) });
+                    });
+
+                    var chart = new CanvasJS.Chart("relatorioConteudo",
+                    {
+                        exportEnabled: true,
+                        exportFileName: "Teste...",
+                        title: {
+                            text: "Top 10 Produtos Mais Vendidos"
+                        },
+                        animationEnabled: true,
+                        data: [{
+                            type: "pie",
+                            dataPoints: resultado,
+                        }]
+                    });
+                    chart.render();
+                },
+                error: function () {
+
+                }
+            });
+
+            console.log($("#relatorioTop10 div[data-role='header']").height());
+
+            $('#relatorioConteudo').css('height', 'calc(100% - 50px)'); 
+        }
+
+        relatorioTempo();
+
+        relatorioTop10();
 
         listaComandas();
 

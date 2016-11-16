@@ -14,37 +14,6 @@
         <link rel="stylesheet" type="text/css" href="css/jquery.mobile.simpledialog.min.css" />
 
         <title>Comanda 2.0</title>
-
-        <style>
-            ::-webkit-scrollbar { 
-                display: none; 
-            }
-
-            #msg p{
-                text-align: center; 
-            }
-
-            .badge {
-              background: #BA070F;
-              color: #fff;
-              padding: 1px 7px;
-              position: absolute;
-              right: 12px;
-              top: 10px;
-              z-index: 999;
-              border-radius: .8em;
-              display: none;
-            }
-
-            .ui-flipswitch{
-                margin-right: 15px;
-            }
-
-            .ui-flipswitch-on{
-                color: #fff !important;
-                text-shadow: none !important;
-            }
-        </style>
     </head>
 <body>
     <div data-role="page" id="paginaPrincipal">
@@ -54,6 +23,7 @@
         <div data-role="main" class="ui-content" id="main">
             <div class="chooseBtn btn-primary"><a href="#novaComanda" data-transition="slide">Abrir Nova Comanda</a></div>
             <div class="chooseBtn btn-primary"><a href="#comandasAbertas" data-transition="slide">Comandas Abertas</a></div>
+            <div class="chooseBtn btn-primary"><a href="#relatorios" data-transition="slide">Relatórios</a></div>
         </div>
         <!--<div data-role="footer" data-position="fixed">
             <div data-role="navbar">
@@ -126,9 +96,17 @@
         </div>
 
         <div data-role="footer" data-position="fixed">
-            <a href="index.html" data-role="button" data-icon="plus" id="cadastrarPedido">Cadastrar Pedido</a>
-            <a href="index.html" data-role="button" data-icon="plus" id="atualizarPedido">Atualizar Pedido</a>
-            <a href="index.html" data-role="button" data-icon="plus" id="adicionarProduto">Adicionar Produto</a>
+            <div id="valorcomanda">
+                <span>VALOR TOTAL: </span>
+                <span id="valortotal"></span>
+            </div>
+
+            <div>
+                <a href="index.html" data-role="button" data-icon="plus" id="cadastrarPedido">Cadastrar Pedido</a>
+                <a href="index.html" data-role="button" data-icon="plus" id="atualizarPedido">Atualizar Pedido</a>
+                <a href="index.html" data-role="button" data-icon="plus" id="adicionarProduto">Adicionar Produto</a>
+                <a href="index.html" data-role="button" data-icon="plus" id="confirmarEntrega">Confirmar Entrega</a>
+            </div>
         </div>
     </div>
     
@@ -151,6 +129,40 @@
         </div>-->
     </div>
 
+    <div data-role="page" id="relatorios">
+        <div data-role="header">
+            <a href="#paginaPrincipal" data-icon="back" data-rel="back" title="Go back">Voltar</a>
+            <h1>Relatórios</h1>
+        </div>
+
+        <div data-role="main" class="ui-content" id="main">
+            <div class="chooseBtn btn-primary"><a href="#relatorioTempo" data-transition="slide">Relatório Tempo de Espera</a></div>
+            <div class="chooseBtn btn-primary"><a href="#relatorioTop10" data-transition="slide">Relatório Top 10</a></div>
+        </div>
+    </div>
+
+    <div data-role="page" id="relatorioTempo">
+        <div data-role="header">
+            <a href="#paginaPrincipal" data-icon="back" data-rel="back" title="Go back">Voltar</a>
+            <h1>Tempo de Espera</h1>
+        </div>
+
+        <div data-role="main" class="ui-content">
+            <ul data-role="listview" data-inset="true" data-filter="true" data-filter-placeholder="Pesquisa" id="listaTempo"></ul>
+        </div>
+    </div>
+
+    <div data-role="page" id="relatorioTop10">
+        <div data-role="header">
+            <a href="#paginaPrincipal" data-icon="back" data-rel="back" title="Go back">Voltar</a>
+            <h1>Top 10</h1>
+        </div>
+
+        <div data-role="main" class="ui-content" style="height: 100%;">
+            <div id="relatorioConteudo" style="width: 100%;"></div>
+        </div>
+    </div>
+
     <script type="text/javascript" src="cordova.js"></script>
     <script type="text/javascript" src="scripts/index.js"></script>
     <script type="text/javascript" src="scripts/jquery.min.js"></script>
@@ -158,6 +170,7 @@
     <script type="text/javascript" src="scripts/platformOverrides.js"></script>
     <script type="text/javascript" src="scripts/jquery.mobile.simpledialog2.min.js"></script>
     <script type="text/javascript" src="scripts/moment.js"></script>
+    <script src="http://canvasjs.com/assets/script/canvasjs.min.js"></script>
     <script>
         $('#msg').popup({ zIndex: 3999 });
 

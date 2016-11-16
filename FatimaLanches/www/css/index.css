@@ -97,7 +97,7 @@ h1 {
 #main {
     display: flex;
     flex-flow: row wrap;
-    align-content: space-around;
+    align-content: flex-start;
     justify-content: space-between;
     height: 75%;
 }
@@ -110,6 +110,7 @@ h1 {
     text-align: center;
     align-items: center;
     padding: 10px 20px 10px 20px;
+    margin-bottom: 10px;
 }
 
 .btn-primary{
@@ -159,6 +160,10 @@ h1 {
     text-align: right;
 }
 
+.ui-flipswitch{
+    border-color: #ccc !important;
+}
+
 .ui-flipswitch,
 .ui-flipswitch-off{
     background: green !important;
@@ -166,6 +171,50 @@ h1 {
     text-shadow: none !important;
 }
 
+#valorcomanda{
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    width: 100%;
+    background: #333;
+    color: #fff;
+    margin-top: 5px;
+    border-radius: 3px;
+}
+
 .ui-page-theme-a .ui-flipswitch-active{
     background-color: red !important;
+}
+
+::-webkit-scrollbar { 
+    display: none; 
+}
+
+#msg p{
+    text-align: center; 
+}
+
+.badge {
+    background: #BA070F;
+    color: #fff;
+    padding: 1px 7px;
+    position: absolute;
+    right: 12px;
+    top: 10px;
+    z-index: 999;
+    border-radius: .8em;
+    display: none;
+}
+
+.ui-flipswitch{
+    margin-right: 15px;
+}
+
+.ui-flipswitch-on{
+    color: #fff !important;
+    text-shadow: none !important;
+}
+
+#numeroMesa{
+    display: inline-block;
 }
