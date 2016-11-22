@@ -28,7 +28,7 @@
 
             $('#valorcomanda, #confirmarEntrega').show();
 
-            $('#atualizarPedido').show().css('display', 'inline-block');
+            $('#atualizarPedido, #confirmarEntrega').show().css('display', 'inline-block');
 
             var valor = 0;
             
@@ -49,7 +49,7 @@
                         if (field.observacao != null || field.observacao != 'undefined'){
                             lista += "<p>" + field.observacao + "</p>";
                         }
-                        lista += "<p class='precoItem'>R$: " + field.valortotalitem.slice(0,5) + "</p>";
+                        lista += "<p class='precoItem'>R$: " + field.valortotalitem.slice(0,4) + "</p>";
                         lista += "</a>";
                         lista += "<a href='#' data-icon='delete' id='rmv_" + field.idproduto + "' class='rmvProduto'></a>";
                         lista += "</li>";
@@ -114,6 +114,7 @@
             }).done(function () {
                 $.ajax({
                     type: "GET",
+                    async: false,
                     url: host + "getAdicional.php?idsetor=" + idsetor,
                     success: function (result) {
                         $.each(JSON.parse(result), function (i, field) {
@@ -149,6 +150,24 @@
                     console.log('Error: ' + e.message);
                 }
             });
+
+            $.mobile.changePage("#paginaPrincipal", { transition: "slideup", changeHash: false });
+            $('<div>').simpledialog2({
+                mode: 'button',
+                headerText: 'Sucesso',
+                headerClose: true,
+                buttonPrompt: 'Pedido confirmado às ' + moment().format('HH:mm:ss') + '!',
+                buttons: {
+                    'OK': {
+                        click: function () {
+                        },
+                    }
+                }
+            });
+
+            setTimeout(function () {
+                $.mobile.sdCurrentDialog.close();
+            }, 2000);
         });
 
         $("#verExtrato").on('click', function () {
@@ -172,8 +191,16 @@
             e.preventDefault();
 
             var totaladicional, precoadicional, descricao = '';
-            totaladicional = 0, parseFloat(valortotal);
+            totaladicional = 0;
+
+            if($('#valortotal').text() != ''){
+                valortotal = parseFloat($('#valortotal').text());
+            } else {
+                valortotal = 0;
+            }
+            
             parseFloat(totaladicional);
+            parseFloat(valortotal);
 
             $('#any').find('#divPadrao div').each(function (index) {
                 if ($('#select' + index + ' option:selected').text() == "SEM")
@@ -187,15 +214,12 @@
                     totaladicional += precoadicional;
                 }
             });
-
-            if ($('#comandaListview li').length != 0) {
-                console.log('Tem prdouto na lista', $('#valortotal').text(), precoproduto);
-                $('.badge').show().html($('#comandaListview li').length);
-            }
             
             totaladicional += precoproduto;
+            totaladicional = totaladicional.toFixed(2);
 
             idcomanda = $('#idComanda').text();
+
             lista = "<li id=" + idproduto + " nomeproduto='" + nomeproduto + "'descricao='" + descricao + "' idcomanda='" + idcomanda + "' idproduto='" + idproduto + "' iditemcomanda='" + iditemcomanda + "'precoitem = '" + totaladicional + "'>";
             lista += "<a href=''>";
             lista += "<h2>" + nomeproduto + "</h2>";
@@ -205,14 +229,16 @@
             lista += "<a href='#' data-icon='delete' id='rmv_" + idproduto + "' class='rmvProduto'></a>";
             lista += "</li>";
 
-
             $('#comandaListview').append(lista);
             $('#comandaListview').listview().listview('refresh');
 
+            if ($('#comandaListview li').length != 0) {
+                $('.badge').show().html($('#comandaListview li').length);
+            }
+
             $('#confirmarEntrega').hide();
 
-            console.log(valortotal, parseFloat(totaladicional));
-
+            console.log(totaladicional, valortotal);
             valortotal = valortotal + parseFloat(totaladicional);
             $('#valortotal').text(valortotal);
 
@@ -336,6 +362,10 @@
                             $('#comandaListview').html('');
 
                             $('.badge').hide().html('');
+
+                            $("#number").val('').attr("placeholder", "Digite o número da mesa");
+
+                            $("#valor").text('');
                         }
                     });
 
@@ -374,11 +404,11 @@
                     iditemcomanda = $(this).attr('iditemcomanda');
                     precoproduto = $(this).attr('precoitem');
 
-                    console.log(encodeURI(host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&observacao=" + descricao + "&numeromesa=" + $('#numeroMesa').text() + "&precoitem=" + precoproduto));
+                    descricao = encodeURI(descricao);
 
                     $.ajax({
                         type: "POST",
-                        url: encodeURI(host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&observacao=" + descricao + "&numeromesa=" + $('#numeroMesa').text() + "&precoitem=" + precoproduto),
+                        url: host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&observacao=" + descricao + "&numeromesa=" + $('#numeroMesa').text() + "&precoitem=" + precoproduto,
                         async: false,
                         success: function (result) {
                         },
@@ -437,6 +467,22 @@
             }, 2000);
         });
 
+        $('#btnTempo').on('click', function (e) {
+            e.preventDefault();
+
+            $.mobile.changePage("#relatorioTempo", { transition: "slideup", changeHash: false });
+
+            relatorioTempo();
+        });
+
+        $('#btnTop10').on('click', function (e) {
+            e.preventDefault();
+
+            $.mobile.changePage("#relatorioTop10", { transition: "slideup", changeHash: false });
+
+            relatorioTop10();
+        });
+
         $('#atualizarPedido').on('click', function (e) {
             var id = null;
 
@@ -461,15 +507,14 @@
                     descricao = $(this).attr('descricao');
                     precoproduto = $(this).attr('precoitem');
 
-                    console.log(idproduto, descricao, precoproduto, idcomanda);
-                    console.log(encodeURI(host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&observacao=" + descricao + "&numeromesa=" + $('#numeroMesa').text() + "&precoitem=" + precoproduto));
+                    console.log(descricao);
                                         
                     $.ajax({
                         type: "POST",
                         asyc: false,
-                        url: encodeURI(host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&observacao=" + descricao + "&numeromesa=" + $('#numeroMesa').text() + "&precoitem=" + precoproduto),
+                        url: host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&observacao=" + descricao + "&numeromesa=" + $('#numeroMesa').text() + "&precoitem=" + precoproduto,
                         success: function (result) {
-                            console.log('inseriu!');
+                            console.log('inseriu!',index);
                         },
                         error: function (e) {
                             console.log('Error: ' + e.message);
@@ -686,10 +731,6 @@
 
             $('#relatorioConteudo').css('height', 'calc(100% - 50px)'); 
         }
-
-        relatorioTempo();
-
-        relatorioTop10();
 
         listaComandas();
 
