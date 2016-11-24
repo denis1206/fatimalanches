@@ -8,12 +8,26 @@
     document.addEventListener('deviceready', onDeviceReady.bind(this), false);
 
     var host;
-    //host = "https://stormy-ravine-22148.herokuapp.com/";
-    host = "http://localhost:7541/minhaapi/";
+    host = "https://stormy-ravine-22148.herokuapp.com/";
+    //host = "http://localhost:7541/minhaapi/";
 
     function onDeviceReady() {
 
         var idproduto, idprodutocaracteristica, nomeproduto, descricao, idcomanda, iditemcomanda, lista, precoproduto, idsetor = null, valortotal = 0;
+
+        function insertItemComanda(idcomanda, idproduto, datalancamento, horalancamento, descricao, numeromesa, precoduto) {
+            $.ajax({
+                type: "POST",
+                asyc: false,
+                url: host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + datalancamento + "&horalancamento=" + horalancamento + "&observacao=" + descricao + "&numeromesa=" + numeromesa + "&precoitem=" + precoproduto,
+                success: function (result) {
+                    console.log('inseriu!');
+                },
+                error: function (e) {
+                    console.log('Error: ' + e.message);
+                }
+            });
+        }
 
         $('body').on('click', '.edtComanda', function (e) {
             e.preventDefault();
@@ -84,6 +98,7 @@
             $("#any").show();
             $('#adicionarProduto').css('display', 'inline-block')
             
+            console.log(host + "getCaracteristicaProduto.php?idproduto=" + $(this).attr('id'));
             $.ajax({
                 type: "GET",
                 url: host + "getCaracteristicaProduto.php?idproduto=" + $(this).attr('id'),
@@ -112,6 +127,7 @@
                     console.log('Error: ' + e.message);
                 }
             }).done(function () {
+                console.log(host + "getAdicional.php?idsetor=" + idsetor);
                 $.ajax({
                     type: "GET",
                     async: false,
@@ -406,16 +422,19 @@
 
                     descricao = encodeURI(descricao);
 
-                    $.ajax({
-                        type: "POST",
-                        url: host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&observacao=" + descricao + "&numeromesa=" + $('#numeroMesa').text() + "&precoitem=" + precoproduto,
-                        async: false,
-                        success: function (result) {
-                        },
-                        error: function (e) {
-                            console.log('Error: ' + e.message);
-                        }
-                    });
+                    insertItemComanda(idcomanda, idproduto, moment().format('YYYY-MM-DD'), moment().format('HH:mm:ss'), descricao, $('#numeroMesa').text(), precoproduto);
+                    
+                    //$.ajax({
+                    //    type: "POST",
+                    //    url: host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&observacao=" + descricao + "&numeromesa=" + $('#numeroMesa').text() + "&precoitem=" + precoproduto,
+                    //    async: false,
+                    //    success: function (result) {
+                    //        console.log(host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&observacao=" + descricao + "&numeromesa=" + $('#numeroMesa').text() + "&precoitem=" + precoproduto);
+                    //    },
+                    //    error: function (e) {
+                    //        console.log('Error: ' + e.message);
+                    //    }
+                    //});
                 });
 
                 $('#comandaListview').html('');
@@ -508,18 +527,20 @@
                     precoproduto = $(this).attr('precoitem');
 
                     console.log(descricao);
+
+                    insertItemComanda(idcomanda, idproduto, moment().format('YYYY-MM-DD'), moment().format('HH:mm:ss'), descricao, $('#numeroMesa').text(), precoproduto);
                                         
-                    $.ajax({
-                        type: "POST",
-                        asyc: false,
-                        url: host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&observacao=" + descricao + "&numeromesa=" + $('#numeroMesa').text() + "&precoitem=" + precoproduto,
-                        success: function (result) {
-                            console.log('inseriu!',index);
-                        },
-                        error: function (e) {
-                            console.log('Error: ' + e.message);
-                        }
-                    });
+                    //$.ajax({
+                    //    type: "POST",
+                    //    asyc: false,
+                    //    url: host + "insertItemComanda.php?idcomanda=" + idcomanda + "&idproduto=" + idproduto + "&datalancamento=" + moment().format('YYYY-MM-DD') + "&horalancamento=" + moment().format('HH:mm:ss') + "&observacao=" + descricao + "&numeromesa=" + $('#numeroMesa').text() + "&precoitem=" + precoproduto,
+                    //    success: function (result) {
+                    //        console.log('inseriu!',index);
+                    //    },
+                    //    error: function (e) {
+                    //        console.log('Error: ' + e.message);
+                    //    }
+                    //});
                 });
 
                 $.ajax({
@@ -697,7 +718,7 @@
 
             $.ajax({
                 type: "GET",
-                url: "http://localhost:7541/minhaapi/getVendasProdutos.php",
+                url: host + "getVendasProdutos.php",
                 dataType: "json",
                 crossDomain: true,
                 asyc: false,
